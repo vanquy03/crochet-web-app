@@ -1,0 +1,21 @@
+{
+  "name": "tiem-len",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Website bán len nhẹ bằng HTML, CSS và JavaScript thuần",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs",
+    "test": "node --test",
+    "format": "prettier --write src scripts tests README.md package.json .prettierrc.json",
+    "format:check": "prettier --check src scripts tests README.md package.json .prettierrc.json"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "prettier": "3.9.9"
+  }
+}
