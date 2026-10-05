@@ -1,62 +1,9 @@
-export const products = [
-  {
-    id: 1,
-    name: 'Cotton • Xanh lá thơm',
-    type: 'cotton',
-    desc: 'Cuộn mẫu 50g · Xanh sage',
-    price: 35000,
-    color: '#829478',
-    bg: '#e7ebdf',
-    tag: 'Một màu thật dịu',
-  },
-  {
-    id: 2,
-    name: 'Milk cotton • Hồng phấn',
-    type: 'milk',
-    desc: 'Cuộn mẫu 50g · Hồng pastel',
-    price: 25000,
-    color: '#c69592',
-    bg: '#f1e4df',
-    tag: 'Dành cho dự án nhỏ',
-  },
-  {
-    id: 3,
-    name: 'Cotton • Kem sữa',
-    type: 'cotton',
-    desc: 'Cuộn mẫu 50g · Kem tự nhiên',
-    price: 35000,
-    color: '#d2bc92',
-    bg: '#eee8db',
-    tag: 'Dễ phối màu',
-  },
-  {
-    id: 4,
-    name: 'Milk cotton • Xanh trời',
-    type: 'milk',
-    desc: 'Cuộn mẫu 50g · Xanh nhạt',
-    price: 25000,
-    color: '#8baebc',
-    bg: '#e4ecee',
-    tag: '',
-  },
-  {
-    id: 5,
-    name: 'Milk cotton • Nâu cacao',
-    type: 'milk',
-    desc: 'Cuộn mẫu 50g · Nâu ấm',
-    price: 25000,
-    color: '#967460',
-    bg: '#ece3da',
-    tag: '',
-  },
-  {
-    id: 6,
-    name: 'Kim móc cán gỗ',
-    type: 'tools',
-    desc: 'Dụng cụ mẫu · 3.0 mm',
-    price: 45000,
-    color: '#ac8256',
-    bg: '#e9e8df',
-    tag: 'Góc dụng cụ',
-  },
-];
+﻿import { api } from '../services/api.js';
+export const products = [];
+export async function loadProducts() {
+  const result = await api('/products');
+  products.splice(0, products.length, ...result);
+}
+export function setProducts(items) {
+  products.splice(0, products.length, ...items);
+}

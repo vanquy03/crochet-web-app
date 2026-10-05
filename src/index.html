@@ -23,6 +23,7 @@
         <button class="cartbutton" id="openCart">Giỏ hàng (<span id="count">0</span>)</button>
       </header>
       <main>
+        <p class="help" id="serviceStatus" role="status"></p>
         <section class="hero">
           <div>
             <div class="eyebrow">小さな毛糸屋 · Tiệm len nhỏ</div>
@@ -51,7 +52,7 @@
             <div>
               <div class="eyebrow">Góc nhỏ của người yêu len</div>
               <h2>Tìm cuộn len của bạn</h2>
-              <p>Sản phẩm và giá minh họa cho bản mẫu của tiệm.</p>
+              <p>Chọn màu yêu thích và đặt hàng trực tiếp tại tiệm.</p>
             </div>
             <div class="catalogtools">
               <label class="sr-only" for="sort">Sắp xếp sản phẩm</label
@@ -103,9 +104,18 @@
           <div class="guide">
             <h3>Đặt len thật đơn giản</h3>
             <p><b>01</b> Chọn sản phẩm, xem chi tiết và thêm vào giỏ.</p>
-            <p><b>02</b> Điền lời nhắn, sao chép danh sách và liên hệ tiệm.</p>
-            <p><b>03</b> Tiệm xác nhận tồn kho, phí giao và cách thanh toán.</p>
+            <p><b>02</b> Điền địa chỉ và đặt hàng COD trong giỏ.</p>
+            <p><b>03</b> Lưu mã đơn và mã tra cứu để theo dõi giao hàng.</p>
           </div>
+        </section>
+        <section class="section">
+          <h2>Tra cứu đơn hàng</h2>
+          <form id="lookupForm" class="buyer">
+            <label>Mã đơn<input id="lookupId" required placeholder="TL-…" /></label
+            ><label>Mã tra cứu riêng<input id="lookupToken" required maxlength="64" /></label
+            ><button class="secondary" type="submit">Xem trạng thái</button>
+          </form>
+          <div id="lookupResult" role="status"></div>
         </section>
         <section class="faq">
           <h2>Một vài điều bạn muốn biết</h2>
@@ -160,14 +170,35 @@
         <button class="close" id="closeCart" aria-label="Đóng giỏ hàng">×</button>
       </div>
       <div id="cartItems"></div>
-      <div class="total"><span>Tạm tính</span><span id="total"></span></div>
+      <div class="total"><span>Tiền sản phẩm</span><span id="total"></span></div>
+      <div class="total"><span>Phí giao hàng</span><span id="shippingTotal"></span></div>
+      <div class="total"><span>Tổng thanh toán COD</span><span id="grandTotal"></span></div>
       <form id="buyerForm" class="buyer">
         <label
-          >Tên của bạn (không bắt buộc)<input
+          >Họ và tên<input
             id="buyerName"
+            required
+            minlength="2"
             maxlength="80"
             autocomplete="name"
             placeholder="Tiệm nên gọi bạn là gì?" /></label
+        ><label
+          >Số điện thoại<input
+            id="buyerPhone"
+            type="tel"
+            autocomplete="tel"
+            required
+            maxlength="16"
+            placeholder="09xxxxxxxx" /></label
+        ><label
+          >Địa chỉ nhận hàng<textarea
+            id="buyerAddress"
+            autocomplete="street-address"
+            required
+            minlength="10"
+            maxlength="500"
+            placeholder="Số nhà, đường, phường/xã, tỉnh/thành"
+          ></textarea></label
         ><label
           >Lời nhắn (không bắt buộc)<textarea
             id="buyerNote"
@@ -177,9 +208,11 @@
         </label>
       </form>
       <p class="help">
-        Tạm tính chưa gồm vận chuyển. Shop sẽ xác nhận khi bạn liên hệ; thêm vào giỏ chưa phải đặt
-        hàng.
+        Thanh toán khi nhận hàng (COD). Kiểm tra địa chỉ và tổng tiền trước khi đặt đơn.
       </p>
+      <button class="primary" id="submitOrder" type="submit" form="buyerForm">Đặt hàng COD</button>
+      <p class="help" id="checkoutStatus" role="status"></p>
+      <div id="orderReceipt"></div>
       <div class="actions" id="orderChannels"></div>
       <div class="actions">
         <button class="primary" id="copy">Sao chép danh sách</button

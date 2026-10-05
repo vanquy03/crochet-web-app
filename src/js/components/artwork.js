@@ -1,3 +1,4 @@
+import { escapeHTML } from '../utils/html.js';
 function ball(color, x = 160, y = 145, r = 90, scope = 'hero') {
   let lines = '';
   for (let i = -7; i <= 7; i++)
@@ -40,6 +41,8 @@ function ball(color, x = 160, y = 145, r = 90, scope = 'hero') {
     />`;
 }
 function renderProductArt(p, context = 'catalog') {
+  if (p.imageUrl)
+    return `<img class="productimage" src="${escapeHTML(p.imageUrl)}" alt="Ảnh sản phẩm" loading="lazy">`;
   return /* HTML */ `<svg viewBox="0 0 340 280" aria-hidden="true">
     ${p.type === 'tools' ? '<g transform="rotate(30 170 140)"><rect x="153" y="100" width="34" height="142" rx="15" fill="#b58b61"/><path d="M170 105 V40 Q170 22 184 32 Q193 44 181 50" stroke="#88988d" stroke-width="12" fill="none" stroke-linecap="round"/></g>' : ball(p.color, 166, 138, 91, `${context}-${p.id}`) + '<rect x="120" y="99" width="90" height="77" rx="2" fill="#faf7ef"/><text x="165" y="130" text-anchor="middle" fill="#355747" font-family="Georgia" font-size="18">tiệm len</text><text x="165" y="153" text-anchor="middle" fill="#778170" font-family="Arial" font-size="9">MADE FOR YOUR IDEAS</text>'}
   </svg>`;

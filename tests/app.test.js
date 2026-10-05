@@ -28,6 +28,7 @@ function element(id) {
       close() {
         this.open = false;
       },
+      reset() {},
       reportValidity() {
         return true;
       },
@@ -54,6 +55,14 @@ globalThis.document = {
   },
 };
 globalThis.localStorage = { getItem: () => null, setItem() {} };
+const { products: samples } = await import('../src/js/data/sample-products.js');
+globalThis.fetch = async (url) => ({
+  ok: true,
+  json: async () =>
+    url.endsWith('/products')
+      ? samples.map((p) => ({ ...p, stock: 99 }))
+      : { name: 'Tiệm Len', demo: true, shippingFee: 30000, freeShippingThreshold: 500000 },
+});
 await import('../src/js/main.js');
 const cart = await import('../src/js/features/cart.js');
 const catalog = await import('../src/js/features/catalog.js');
@@ -131,4 +140,76 @@ test('SVG identifiers are unique between products and detail view', () => {
     artwork.renderProductArt(products[0], 'detail');
   const ids = [...markup.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);
   assert.equal(new Set(ids).size, ids.length);
+});
+
+test('checkout retries reuse the key, preserve cart on error and show receipt on success', async () => {
+  reset();
+  const originalFetch = globalThis.fetch;
+  const stored = new Map();
+  globalThis.sessionStorage = {
+    getItem: (key) => stored.get(key) || null,
+    setItem: (key, value) => stored.set(key, value),
+    removeItem: (key) => stored.delete(key),
+  };
+  const { initCheckout } = await import('../src/js/features/checkout.js');
+  initCheckout();
+  cart.addToCart(1, 1);
+  element('buyerName').value = 'Nguyễn Mai';
+  element('buyerPhone').value = '0912345678';
+  element('buyerAddress').value = '12 Đường Hoa, Phường 1, TP Hồ Chí Minh';
+  element('buyerNote').value = 'Giao giờ hành chính';
+  const requests = [];
+  globalThis.fetch = async (url, options) => {
+    if (url === '/api/orders') {
+      requests.push(options);
+      if (requests.length === 1) throw new Error('Mất kết nối');
+      // Sản phẩm thêm trong lúc gửi không được xóa khi đơn cũ thành công.
+      cart.cartItems[2] = 1;
+      return {
+        ok: true,
+        json: async () => ({
+          order: { id: 'TL-test-order', total: 65000 },
+          lookupToken: 'a'.repeat(64),
+        }),
+      };
+    }
+    return originalFetch(url, options);
+  };
+  try {
+    await element('buyerForm').onsubmit({ preventDefault() {} });
+    assert.equal(cart.cartItems[1], 1);
+    assert.equal(element('checkoutStatus').textContent, 'Mất kết nối');
+    const cached = stored.get('tiemlen-pending-request');
+    assert.ok(cached);
+    assert.ok(!cached.includes('Nguyễn Mai'));
+    // Mô phỏng khởi tạo lại phần checkout: khóa lấy từ sessionStorage.
+    initCheckout();
+    await element('buyerForm').onsubmit({ preventDefault() {} });
+    assert.equal(requests[0].headers['Idempotency-Key'], requests[1].headers['Idempotency-Key']);
+    assert.equal(JSON.parse(requests[1].body).expectedTotal, 65000);
+    assert.equal(cart.cartItems[1], undefined);
+    assert.equal(cart.cartItems[2], 1);
+    assert.ok(element('orderReceipt').innerHTML.includes('TL-test-order'));
+    assert.equal(element('lookupToken').value, 'a'.repeat(64));
+    assert.equal(stored.get('tiemlen-pending-request'), undefined);
+  } finally {
+    globalThis.fetch = originalFetch;
+    reset();
+  }
+});
+
+test('product content is escaped before insertion in catalog and detail HTML', () => {
+  reset();
+  const original = products[0].name;
+  try {
+    products[0].name = '<img src=x onerror="alert(1)">';
+    catalog.renderCatalog();
+    assert.ok(!element('products').innerHTML.includes('<img src=x'));
+    assert.ok(element('products').innerHTML.includes('&lt;img'));
+    catalog.showProductDetail(products[0].id);
+    assert.ok(!element('detailContent').innerHTML.includes('<img src=x'));
+  } finally {
+    products[0].name = original;
+    reset();
+  }
 });

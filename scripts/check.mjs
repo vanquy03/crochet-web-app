@@ -18,6 +18,7 @@ async function walk(directory) {
 }
 await walk(path.join(root, 'src'));
 await walk(path.join(root, 'scripts'));
+await walk(path.join(root, 'server'));
 const html = await readFile(path.join(root, 'src/index.html'), 'utf8');
 for (const match of html.matchAll(/(?:src|href)="((?:js|styles)\/[^"#]+)"/g))
   await access(path.join(root, 'src', match[1]));

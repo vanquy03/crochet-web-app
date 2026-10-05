@@ -303,3 +303,26 @@ html {
     transition: none;
   }
 }
+
+.productimage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.add:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.receipt {
+  padding: 16px;
+  background: #f7e5e8;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+.receipt code {
+  display: block;
+  margin: 8px 0;
+}
+.buyer select {
+  width: 100%;
+}

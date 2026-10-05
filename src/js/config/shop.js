@@ -1,9 +1,14 @@
-// Điền thông tin shop ở đây. Để trống những kênh không sử dụng.
-export const shop = {
+﻿export const shop = {
   name: 'Tiệm Len',
-  zaloPhone: '', // Ví dụ: 09xxxxxxxx (số điện thoại Zalo của chính bạn)
-  facebookUrl: '', // Ví dụ: https://www.facebook.com/ten-shop
+  zaloPhone: '',
+  facebookUrl: '',
   email: '',
   phone: '',
-  demo: true, // Đổi thành false khi đã thay sản phẩm, giá và hình ảnh thực tế.
+  demo: true,
+  shippingFee: 30000,
+  freeShippingThreshold: 500000,
 };
+export let backendAvailable = false;
+export function setBackendAvailable(value) {
+  backendAvailable = value;
+}

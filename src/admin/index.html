@@ -1,0 +1,211 @@
+﻿<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Quản trị • Tiệm Len</title>
+    <link rel="stylesheet" href="/styles/base.css" />
+    <link rel="stylesheet" href="/styles/theme.css" />
+    <link rel="stylesheet" href="/admin/admin.css" />
+  </head>
+  <body>
+    <main class="adminwrap">
+      <header>
+        <a class="logo" href="/">❋ Tiệm Len</a><span>Quản trị cửa hàng</span
+        ><button id="logout" class="secondary" hidden>Đăng xuất</button>
+      </header>
+      <p id="message" role="status"></p>
+      <section id="loginPanel">
+        <h1>Đăng nhập quản trị</h1>
+        <p class="help">Dùng tài khoản đã tạo bằng lệnh admin:create.</p>
+        <form id="loginForm" class="buyer">
+          <label>Email<input name="email" type="email" autocomplete="username" required /></label
+          ><label
+            >Mật khẩu<input
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required /></label
+          ><button class="primary">Đăng nhập</button>
+        </form>
+      </section>
+      <section id="dashboard" hidden>
+        <div id="metrics" class="metrics"></div>
+        <nav class="tabs" aria-label="Các mục quản trị">
+          <button data-tab="products" class="secondary">Sản phẩm</button
+          ><button data-tab="orders" class="secondary">Đơn hàng</button
+          ><button data-tab="settings" class="secondary">Cài đặt shop</button
+          ><button data-tab="account" class="secondary">Tài khoản</button>
+        </nav>
+        <section id="productsPanel">
+          <div class="panelhead">
+            <h2>Sản phẩm & tồn kho</h2>
+            <button id="newProduct" class="primary">Thêm sản phẩm</button>
+          </div>
+          <p class="help">
+            Tồn kho là số lượng có thể bán, đã trừ hàng giữ cho đơn chờ xác nhận. Ẩn sản phẩm không
+            xóa lịch sử đơn.
+          </p>
+          <div class="tablewrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Sản phẩm</th>
+                  <th>Giá</th>
+                  <th>Có thể bán</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="productRows"></tbody>
+            </table>
+          </div>
+        </section>
+        <section id="ordersPanel" hidden>
+          <div class="panelhead">
+            <h2>Đơn hàng</h2>
+            <select id="orderFilter">
+              <option value="">Tất cả</option>
+              <option value="pending">Chờ xác nhận</option>
+              <option value="confirmed">Đã xác nhận</option>
+              <option value="shipping">Đang giao</option>
+              <option value="completed">Hoàn tất</option>
+              <option value="cancelled">Đã hủy</option>
+            </select>
+          </div>
+          <div class="tablewrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mã đơn / Ngày</th>
+                  <th>Khách hàng</th>
+                  <th>Tổng</th>
+                  <th>Trạng thái</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="orderRows"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <button id="prevPage" class="secondary">Trang trước</button><span id="pageInfo"></span
+            ><button id="nextPage" class="secondary">Trang sau</button>
+          </div>
+        </section>
+        <section id="settingsPanel" hidden>
+          <h2>Cài đặt cửa hàng</h2>
+          <form id="settingsForm" class="buyer formgrid">
+            <label>Tên shop<input name="name" required maxlength="200" /></label
+            ><label>Điện thoại<input name="phone" type="tel" /></label
+            ><label>Số Zalo<input name="zaloPhone" type="tel" /></label
+            ><label>Facebook URL<input name="facebookUrl" type="url" /></label
+            ><label>Email liên hệ<input name="email" type="email" /></label
+            ><label
+              >Phí giao hàng (VND)<input
+                name="shippingFee"
+                type="number"
+                min="0"
+                max="1000000"
+                required /></label
+            ><label
+              >Miễn phí giao từ (VND; 0 để tắt)<input
+                name="freeShippingThreshold"
+                type="number"
+                min="0"
+                max="100000000"
+                required /></label
+            ><label class="check"
+              ><input name="demo" type="checkbox" /> Hiển thị thông báo dữ liệu mẫu</label
+            ><button class="primary">Lưu cài đặt</button>
+          </form>
+        </section>
+        <section id="accountPanel" hidden>
+          <h2>Đổi mật khẩu</h2>
+          <form id="passwordForm" class="buyer">
+            <label
+              >Mật khẩu hiện tại<input
+                name="currentPassword"
+                type="password"
+                required
+                autocomplete="current-password" /></label
+            ><label
+              >Mật khẩu mới (ít nhất 12 ký tự)<input
+                name="password"
+                type="password"
+                required
+                minlength="12"
+                maxlength="200"
+                autocomplete="new-password" /></label
+            ><button class="primary">Đổi mật khẩu và đăng xuất</button>
+          </form>
+        </section>
+      </section>
+    </main>
+    <dialog id="productDialog">
+      <div class="dialoghead">
+        <h2 id="productTitle">Sản phẩm</h2>
+        <button data-close="productDialog" class="close" aria-label="Đóng">×</button>
+      </div>
+      <form id="productForm" class="buyer formgrid">
+        <label>Tên sản phẩm<input name="name" required minlength="2" maxlength="120" /></label
+        ><label
+          >Loại<select name="type">
+            <option value="cotton">Cotton</option>
+            <option value="milk">Milk cotton</option>
+            <option value="tools">Phụ kiện</option>
+          </select></label
+        ><label
+          >Giá (VND)<input name="price" type="number" min="0" max="100000000" required /></label
+        ><label
+          >Tồn kho có thể bán<input
+            name="stock"
+            type="number"
+            min="0"
+            max="1000000"
+            required /></label
+        ><label>Mô tả / quy cách<textarea name="desc" maxlength="2000"></textarea></label
+        ><label>Nhãn giới thiệu<input name="tag" maxlength="80" /></label
+        ><label>Màu len<input name="color" type="color" value="#c69592" /></label
+        ><label>Màu nền<input name="bg" type="color" value="#f1e4df" /></label
+        ><label
+          >URL ảnh<input
+            name="imageUrl"
+            maxlength="1000"
+            placeholder="HTTPS hoặc ảnh đã tải lên" /></label
+        ><label
+          >Tải ảnh (PNG/JPG/WebP, tối đa 5 MB)<input
+            id="imageFile"
+            type="file"
+            accept="image/png,image/jpeg,image/webp" /></label
+        ><label class="check"><input name="active" type="checkbox" checked /> Đang bán</label>
+        <p id="productError" role="status"></p>
+        <button class="primary">Lưu sản phẩm</button>
+      </form>
+    </dialog>
+    <dialog id="orderDialog">
+      <div class="dialoghead">
+        <h2>Chi tiết đơn hàng</h2>
+        <button data-close="orderDialog" class="close" aria-label="Đóng">×</button>
+      </div>
+      <div id="orderDetail"></div>
+      <form id="orderForm" class="buyer">
+        <label
+          >Trạng thái<select name="status">
+            <option value="pending">Chờ xác nhận</option>
+            <option value="confirmed">Đã xác nhận</option>
+            <option value="shipping">Đang giao</option>
+            <option value="completed">Hoàn tất</option>
+            <option value="cancelled">Hủy đơn & hoàn tồn kho</option>
+          </select></label
+        ><label class="check"><input name="paid" type="checkbox" /> Đã thu tiền</label>
+        <p class="help">
+          Luồng: chờ xác nhận → đã xác nhận → đang giao → hoàn tất. Chỉ hủy trước khi giao; hàng
+          được hoàn tồn đúng một lần.
+        </p>
+        <p id="orderError" role="status"></p>
+        <button class="primary">Cập nhật đơn</button>
+      </form>
+    </dialog>
+    <script type="module" src="/admin/admin.js"></script>
+  </body>
+</html>

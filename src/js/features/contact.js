@@ -75,7 +75,7 @@ export function initContact() {
   }
   $('contactStatus').textContent = channels
     ? 'Tiệm sẽ xác nhận sản phẩm và thông tin giao hàng qua kênh bạn chọn.'
-    : 'Tiệm đang cập nhật thông tin liên hệ. Bạn có thể chọn len và lưu danh sách trước.';
+    : 'Bạn có thể đặt hàng COD trực tiếp trong giỏ hàng.';
   $('footerContact').textContent = channels
     ? shop.name + ' · ' + (phone || shop.email || 'Liên hệ qua Zalo / Facebook')
     : 'Thông tin shop đang được cập nhật.';

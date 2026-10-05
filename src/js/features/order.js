@@ -1,3 +1,4 @@
+import { initCheckout } from './checkout.js';
 import { products } from '../data/products.js';
 import { shop } from '../config/shop.js';
 import { $, formatMoney, showToast } from '../utils/dom.js';
@@ -43,5 +44,5 @@ export function initOrder() {
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
-  $('buyerForm').onsubmit = (e) => e.preventDefault();
+  initCheckout();
 }

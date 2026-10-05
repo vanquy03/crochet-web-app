@@ -1,6 +1,8 @@
 import { products } from '../data/products.js';
 import { $, formatMoney } from '../utils/dom.js';
 import { renderProductArt } from '../components/artwork.js';
+import { safeProduct } from '../utils/html.js';
+import { backendAvailable } from '../config/shop.js';
 import { addToCart } from './cart.js';
 let filter = 'all';
 export function setFilter(value) {
@@ -17,31 +19,39 @@ export function renderCatalog() {
   if ($('sort').value === 'desc') shown.sort((a, b) => b.price - a.price);
   $('products').innerHTML =
     shown
-      .map(
-        (p) =>
-          /* HTML */ `<article>
-            <button
-              class="productart productvisual"
-              data-detail="${p.id}"
-              style="--bg:${p.bg}"
-              aria-label="Xem chi tiết ${p.name}"
-            >
-              ${renderProductArt(p)}${p.tag ? `<span class="tag">${p.tag}</span>` : ''}
-            </button>
-            <div class="meta">
-              <div>
-                <h3><button class="producttitle" data-detail="${p.id}">${p.name}</button></h3>
-                <p>${p.desc}</p>
-              </div>
-              <button class="add" data-add="${p.id}" aria-label="Thêm ${p.name} vào giỏ">+</button>
+      .map((product) => {
+        const p = safeProduct(product);
+        return /* HTML */ `<article>
+          <button
+            class="productart productvisual"
+            data-detail="${p.id}"
+            style="--bg:${p.bg}"
+            aria-label="Xem chi tiết ${p.name}"
+          >
+            ${renderProductArt(p)}${p.tag ? `<span class="tag">${p.tag}</span>` : ''}
+          </button>
+          <div class="meta">
+            <div>
+              <h3><button class="producttitle" data-detail="${p.id}">${p.name}</button></h3>
+              <p>${p.desc}</p>
             </div>
-            <div class="price">${formatMoney(p.price)}</div>
-          </article>`,
-      )
+            <button
+              class="add"
+              data-add="${p.id}"
+              aria-label="Thêm ${p.name} vào giỏ"
+              ${backendAvailable && p.stock === 0 ? 'disabled' : ''}
+            >
+              +
+            </button>
+          </div>
+          <div class="price">${formatMoney(p.price)}</div>
+        </article>`;
+      })
       .join('') || '<p class="empty">Chưa tìm thấy sản phẩm. Thử một từ khóa khác nhé.</p>';
 }
 export function showProductDetail(id) {
-  const p = products.find((p) => p.id === Number(id));
+  const raw = products.find((p) => p.id === Number(id));
+  const p = raw && safeProduct(raw);
   if (!p) return;
   $('detailContent').innerHTML = /* HTML */ `<div class="detailgrid">
     <div class="productart" style="--bg:${p.bg}">${renderProductArt(p, 'detail')}</div>
@@ -59,7 +69,7 @@ export function showProductDetail(id) {
         <dt>Quy cách mẫu</dt>
         <dd>${p.desc}</dd>
         <dt>Tình trạng</dt>
-        <dd>Liên hệ xác nhận tồn kho</dd>
+        <dd>${backendAvailable ? `Còn ${p.stock} sản phẩm` : 'Bản xem giao diện'}</dd>
       </dl>
       <label class="help" for="detailQty">Số lượng</label>
       <div class="detailactions">
@@ -68,17 +78,16 @@ export function showProductDetail(id) {
           id="detailQty"
           type="number"
           min="1"
-          max="99"
+          max="${Math.min(99, p.stock || 0)}"
           value="1"
           required
         /><button class="primary" id="detailAdd">Thêm vào giỏ</button
-        ><button class="secondary" id="detailBuy">Liên hệ mua</button>
+        ><button class="secondary" id="detailBuy">Đặt hàng</button>
       </div>
-      <p class="help">
-        Màu minh họa có thể khác sản phẩm thật. Giá và quy cách hiện là dữ liệu mẫu.
-      </p>
+      <p class="help">Màu có thể khác tùy màn hình. Vui lòng hỏi tiệm khi cần ảnh thực tế.</p>
     </div>
   </div>`;
+  $('detailAdd').disabled = $('detailBuy').disabled = backendAvailable && p.stock === 0;
   $('detailAdd').onclick = () => {
     const input = $('detailQty');
     if (!input.reportValidity() || !Number.isInteger(input.valueAsNumber)) return;
