@@ -1,4 +1,5 @@
-﻿import express from 'express';
+import express from 'express';
+import { registerCommunityRoutes } from './routes/community.js';
 import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import multer from 'multer';
@@ -10,6 +11,7 @@ import { registerPublicRoutes } from './routes/public.js';
 import { registerAuthRoutes } from './routes/auth.js';
 import { registerProductsRoutes } from './routes/products.js';
 import { registerOrdersRoutes } from './routes/orders.js';
+import { registerCustomerRoutes } from './routes/customers.js';
 import { registerSettingsRoutes } from './routes/settings.js';
 
 const projectRoot = fileURLToPath(new URL('../', import.meta.url));
@@ -48,7 +50,10 @@ export function createApp({
       const expected = new URL(`${req.protocol}://${req.get('host')}`).origin;
       if (origin && origin !== expected)
         return next(new HttpError(403, 'Nguồn yêu cầu không hợp lệ.'));
-      if (req.path !== '/admin/uploads' && !req.is('application/json'))
+      if (
+        !['/admin/uploads', '/community/uploads'].includes(req.path) &&
+        !req.is('application/json')
+      )
         return next(new HttpError(415, 'Yêu cầu phải dùng JSON.'));
     }
     next();
@@ -67,9 +72,18 @@ export function createApp({
     legacyHeaders: false,
     message: { error: 'Bạn gửi quá nhiều yêu cầu. Vui lòng thử lại sau.' },
   });
-  registerPublicRoutes(app, { db, orderLimit });
+  registerPublicRoutes(app, { db });
+  const customerAuthLimit = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 20,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    message: { error: 'Thử đăng nhập hoặc đăng ký quá nhiều lần. Vui lòng đợi 15 phút.' },
+  });
+  registerCustomerRoutes(app, { db, production, authLimit: customerAuthLimit, orderLimit });
   // Auth đăng ký login trước rồi áp middleware phiên cho các API admin còn lại.
   registerAuthRoutes(app, { db, production, loginLimit });
+  registerCommunityRoutes(app, { db, uploadDir });
   registerProductsRoutes(app, { db, uploadDir });
   registerOrdersRoutes(app, { db });
   registerSettingsRoutes(app, { db });

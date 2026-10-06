@@ -1,4 +1,4 @@
-﻿import { randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import { transaction, getSettings } from '../database.js';
 import { digest } from '../security.js';
 import { customerInput, text, HttpError } from '../validation.js';
@@ -12,7 +12,12 @@ export function readOrder(db, id) {
     .all(id);
   return order;
 }
-export function placeOrder(db, body, key) {
+export function placeOrder(db, body, key, customerId) {
+  if (
+    !Number.isSafeInteger(customerId) ||
+    !db.prepare('SELECT id FROM customers WHERE id=?').get(customerId)
+  )
+    throw new HttpError(401, 'Vui lòng đăng nhập để đặt hàng.');
   const customer = customerInput(body);
   if (body.paymentMethod !== 'cod') throw new HttpError(400, 'Hiện chỉ hỗ trợ thanh toán COD.');
   if (!Number.isSafeInteger(body.expectedTotal) || body.expectedTotal < 0)
@@ -20,16 +25,16 @@ export function placeOrder(db, body, key) {
   key = text(key, 'Mã gửi đơn', 36, 36);
   if (!/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(key))
     throw new HttpError(400, 'Mã gửi đơn không hợp lệ.');
-  const requestHash = digest(JSON.stringify(customer));
+  const requestHash = digest(JSON.stringify({ customerId, ...customer }));
   const token = digest('lookup:' + key);
   return transaction(db, () => {
     const existing = db
-      .prepare('SELECT id,request_hash FROM orders WHERE idempotency_key=?')
+      .prepare('SELECT id,request_hash,customer_id FROM orders WHERE idempotency_key=?')
       .get(key);
     if (existing) {
-      if (existing.request_hash !== requestHash)
+      if (existing.customer_id !== customerId || existing.request_hash !== requestHash)
         throw new HttpError(409, 'Mã gửi đơn đã dùng cho nội dung khác.');
-      return { order: readOrder(db, existing.id), lookupToken: token, replay: true };
+      return { order: readOrder(db, existing.id), replay: true };
     }
     const items = customer.items.map((item) => {
       const product = db
@@ -52,7 +57,7 @@ export function placeOrder(db, body, key) {
       );
     const id = 'TL-' + randomUUID();
     db.prepare(
-      'INSERT INTO orders(id,lookup_hash,idempotency_key,request_hash,name,phone,address,note,subtotal,shipping_fee,total) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
+      'INSERT INTO orders(id,lookup_hash,idempotency_key,request_hash,name,phone,address,note,subtotal,shipping_fee,total,customer_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',
     ).run(
       id,
       digest(token),
@@ -65,6 +70,7 @@ export function placeOrder(db, body, key) {
       subtotal,
       shippingFee,
       subtotal + shippingFee,
+      customerId,
     );
     for (const item of items) {
       const result = db
@@ -83,7 +89,7 @@ export function placeOrder(db, body, key) {
         id,
       );
     }
-    return { order: readOrder(db, id), lookupToken: token, replay: false };
+    return { order: readOrder(db, id), replay: false };
   });
 }
 export function updateOrder(db, id, status, paid) {

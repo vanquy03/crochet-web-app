@@ -1,0 +1,212 @@
+{
+  "admin": {
+    "email": "admin@tiemlen.test",
+    "password": "AdminTest123!"
+  },
+  "products": [
+    {
+      "id": 10007,
+      "name": "Khăn len hồng dịu — mẫu thủ công",
+      "type": "milk",
+      "kind": "handmade",
+      "desc": "Sản phẩm mẫu cho góc trưng bày. Thay bằng ảnh thực tế, chất liệu và kích thước chiếc khăn của bạn.",
+      "price": 220000,
+      "stock": 2,
+      "color": "#bd909b",
+      "bg": "#efe6db",
+      "tag": "Thủ công · mẫu",
+      "imageUrl": "/images/handmade-scarf.svg",
+      "active": true
+    },
+    {
+      "id": 10006,
+      "name": "Túi len nhỏ màu nắng — mẫu thủ công",
+      "type": "cotton",
+      "kind": "handmade",
+      "desc": "Sản phẩm mẫu cho góc trưng bày. Thay bằng ảnh và câu chuyện món đồ bạn tự làm. Hình hiện tại là minh họa.",
+      "price": 180000,
+      "stock": 3,
+      "color": "#c39f78",
+      "bg": "#efe6db",
+      "tag": "Thủ công · mẫu",
+      "imageUrl": "/images/handmade-bag.svg",
+      "active": true
+    },
+    {
+      "id": 10001,
+      "name": "[TEST] Cotton xanh sage",
+      "type": "cotton",
+      "desc": "Len cotton 50g dùng thử checkout.",
+      "price": 35000,
+      "stock": 50,
+      "color": "#829478",
+      "bg": "#e7ebdf",
+      "tag": "Dữ liệu test"
+    },
+    {
+      "id": 10002,
+      "name": "[TEST] Milk cotton hồng",
+      "type": "milk",
+      "desc": "Len milk cotton 50g dùng thử checkout.",
+      "price": 25000,
+      "stock": 60,
+      "color": "#c69592",
+      "bg": "#f1e4df",
+      "tag": "Dữ liệu test"
+    },
+    {
+      "id": 10003,
+      "name": "[TEST] Kim móc 3.0 mm",
+      "type": "tools",
+      "desc": "Kim móc dùng thử quản lý sản phẩm.",
+      "price": 45000,
+      "stock": 30,
+      "color": "#ac8256",
+      "bg": "#e9e8df",
+      "tag": "Dữ liệu test"
+    },
+    {
+      "id": 10004,
+      "name": "[TEST] Cotton hết hàng",
+      "type": "cotton",
+      "desc": "Kiểm tra hiển thị sản phẩm hết hàng.",
+      "price": 35000,
+      "stock": 0,
+      "color": "#d2bc92",
+      "bg": "#eee8db",
+      "tag": "Hết hàng"
+    },
+    {
+      "id": 10005,
+      "name": "[TEST] Sản phẩm ẩn",
+      "type": "milk",
+      "desc": "Chỉ hiển thị trong quản trị.",
+      "price": 25000,
+      "stock": 10,
+      "color": "#8baebc",
+      "bg": "#e4ecee",
+      "tag": "Dữ liệu test",
+      "active": false
+    }
+  ],
+  "orders": [
+    {
+      "key": "00000000-0000-4000-8000-000000000001",
+      "name": "Khách test 1",
+      "phone": "0900000000",
+      "address": "Địa chỉ giả lập: 123 Đường Test, Quận 1, TP.HCM",
+      "note": "Đơn thử nghiệm từ db:seed",
+      "status": "pending",
+      "items": [
+        {
+          "productId": 10001,
+          "quantity": 2
+        },
+        {
+          "productId": 10002,
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "key": "00000000-0000-4000-8000-000000000002",
+      "name": "Khách test 2",
+      "phone": "0900000000",
+      "address": "Địa chỉ giả lập: 123 Đường Test, Quận 1, TP.HCM",
+      "note": "Đơn thử nghiệm từ db:seed",
+      "status": "confirmed",
+      "items": [
+        {
+          "productId": 10001,
+          "quantity": 2
+        },
+        {
+          "productId": 10002,
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "key": "00000000-0000-4000-8000-000000000003",
+      "name": "Khách test 3",
+      "phone": "0900000000",
+      "address": "Địa chỉ giả lập: 123 Đường Test, Quận 1, TP.HCM",
+      "note": "Đơn thử nghiệm từ db:seed",
+      "status": "shipping",
+      "items": [
+        {
+          "productId": 10001,
+          "quantity": 2
+        },
+        {
+          "productId": 10002,
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "key": "00000000-0000-4000-8000-000000000004",
+      "name": "Khách test 4",
+      "phone": "0900000000",
+      "address": "Địa chỉ giả lập: 123 Đường Test, Quận 1, TP.HCM",
+      "note": "Đơn thử nghiệm từ db:seed",
+      "status": "completed",
+      "items": [
+        {
+          "productId": 10001,
+          "quantity": 2
+        },
+        {
+          "productId": 10002,
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "key": "00000000-0000-4000-8000-000000000005",
+      "name": "Khách test 5",
+      "phone": "0900000000",
+      "address": "Địa chỉ giả lập: 123 Đường Test, Quận 1, TP.HCM",
+      "note": "Đơn thử nghiệm từ db:seed",
+      "status": "cancelled",
+      "items": [
+        {
+          "productId": 10001,
+          "quantity": 2
+        },
+        {
+          "productId": 10002,
+          "quantity": 1
+        }
+      ]
+    }
+  ],
+  "customer": {
+    "name": "Khách thử nghiệm",
+    "email": "user@tiemlen.test",
+    "password": "UserTest123!"
+  },
+  "posts": [
+    {
+      "key": "community-slow-1",
+      "title": "Một chiều mưa, mình đan chậm lại",
+      "excerpt": "Chỉ một tách trà ấm, giỏ len nhỏ và tiếng mưa ngoài cửa sổ.",
+      "category": "slow",
+      "content": "Bài viết mẫu.\n\nChiều nay mình đặt điện thoại xuống, pha một tách trà và ngồi bên cửa sổ. Chiếc khăn vẫn còn dang dở, nhưng mình không vội nữa.\n\nCó vài hàng đan chưa đều. Mình tháo ra rồi đan lại, để ý từng chuyển động của tay. Một chút kiên nhẫn với len cũng là một chút dịu dàng với bản thân.\n\nBạn thường tìm một khoảng bình yên như thế nào?"
+    },
+    {
+      "key": "community-memory-1",
+      "title": "Chiếc khăn đầu tiên dành tặng mẹ",
+      "excerpt": "Không hoàn hảo, nhưng mỗi mũi đan đều có một chút thương yêu.",
+      "category": "memory",
+      "content": "Bài viết mẫu.\n\nMình mất nhiều buổi tối để hoàn thành chiếc khăn đầu tiên. Hai đầu khăn hơi lệch, có chỗ mũi đan lỏng hơn, nhưng mẹ vẫn quàng nó với một nụ cười.\n\nTừ hôm đó, mình hiểu món quà tự tay làm còn mang theo thời gian và sự quan tâm. Mình muốn giữ lại kỷ niệm này để những lúc nản lòng có thể đọc lại.\n\nBạn còn nhớ món đồ len đầu tiên của mình không?"
+    },
+    {
+      "key": "community-journey-1",
+      "title": "Niềm vui từ một mũi móc mới",
+      "excerpt": "Hôm nay mình học được một điều nhỏ và muốn kể cùng bạn.",
+      "category": "journey",
+      "content": "Bài viết mẫu.\n\nMình vừa thử một mũi móc mới. Ban đầu đọc hướng dẫn hơi rối, mình chia thành từng bước và thử trên một miếng len nhỏ trước.\n\nSau vài lần tháo ra, những mũi móc bắt đầu thành hình. Chưa cần một sản phẩm lớn, chỉ nhìn thấy mình tiến bộ một chút cũng đủ vui rồi.\n\nNếu bạn đang bắt đầu, cứ dành cho mình thời gian nhé. Chúng ta có thể cùng học, cùng hỏi và cùng chia sẻ những lần thử của mình."
+    }
+  ]
+}

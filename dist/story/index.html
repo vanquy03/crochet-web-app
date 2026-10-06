@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Một câu chuyện • Tiệm Len</title>
+    <link rel="stylesheet" href="/styles/base.css" />
+    <link rel="stylesheet" href="/styles/theme.css" />
+    <link rel="stylesheet" href="/styles/account.css" />
+    <link rel="stylesheet" href="/styles/community.css" />
+  </head>
+  <body>
+    <div class="notice">Một chút len, một khoảng bình yên ♡</div>
+    <div class="wrap">
+      <header>
+        <a class="logo" href="/"><span aria-hidden="true">❋</span> tiệm len</a>
+        <nav aria-label="Điều hướng chính">
+          <a href="/#san-pham">Góc trưng bày</a><a href="/community/">Góc chuyện len</a>
+        </nav>
+        <a class="accountlink" id="memberLink" href="/login/">Đăng nhập</a>
+      </header>
+      <main class="community-main">
+        <a class="back-to-shop" href="/community/">← Về Góc chuyện len</a>
+        <p id="storyStatus" role="status" aria-live="polite">Đang mở câu chuyện…</p>
+        <article id="storyContent" class="story-article" hidden>
+          <div class="eyebrow" id="storyTopic"></div>
+          <h1 id="storyTitle"></h1>
+          <div class="article-meta">
+            <span id="storyAuthor"></span><time id="storyDate"></time
+            ><a id="editStory" hidden class="secondary">Sửa bài viết</a>
+          </div>
+          <p id="storyDemo" class="help" hidden>Bài viết mẫu để trải nghiệm giao diện.</p>
+          <p id="storyPrivate" class="community-invite" hidden></p>
+          <p id="storyIntro" class="article-intro"></p>
+          <div id="storyCover" class="article-cover"></div>
+          <div id="storyBody" class="article-body"></div>
+          <div id="storyInteractions" class="article-interactions">
+            <button id="likePost" class="secondary" aria-pressed="false">♡ Gửi một trái tim</button>
+          </div>
+          <section id="comments" class="comments">
+            <h2>Ngồi lại, kể thêm một chút</h2>
+            <p id="commentCount" class="help"></p>
+            <p id="commentLogin" class="community-invite">
+              <a id="commentLoginLink" href="/login/">Đăng nhập</a> để gửi lời chia sẻ.
+            </p>
+            <form id="commentForm" hidden>
+              <label for="commentContent">Lời chia sẻ của bạn</label
+              ><textarea
+                id="commentContent"
+                required
+                minlength="2"
+                maxlength="1500"
+                rows="4"
+                placeholder="Một lời động viên, một kỷ niệm hoặc một mẹo nhỏ…"
+              ></textarea>
+              <p class="help">Hãy giữ lời chia sẻ tử tế và tôn trọng câu chuyện của nhau.</p>
+              <button id="sendComment" class="primary">Gửi lời chia sẻ</button>
+            </form>
+            <p id="commentStatus" role="status" aria-live="polite"></p>
+            <div id="commentList"></div>
+            <div id="commentPagination" class="history-pagination" hidden>
+              <button id="previousComments" class="secondary">Trang trước</button
+              ><span id="commentPage"></span
+              ><button id="nextComments" class="secondary">Trang sau</button>
+            </div>
+          </section>
+        </article>
+      </main>
+      <footer class="footer">
+        <p>Chậm lại một chút. Đan thêm một hàng.</p>
+        <a href="/community/">Cùng nhau kể chuyện ♡</a>
+      </footer>
+    </div>
+    <script type="module" src="/js/pages/story.js"></script>
+  </body>
+</html>

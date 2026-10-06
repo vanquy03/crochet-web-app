@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Viết một câu chuyện • Tiệm Len</title>
+    <link rel="stylesheet" href="/styles/base.css" />
+    <link rel="stylesheet" href="/styles/theme.css" />
+    <link rel="stylesheet" href="/styles/account.css" />
+    <link rel="stylesheet" href="/styles/community.css" />
+  </head>
+  <body>
+    <div class="notice">Một chút len, một khoảng bình yên ♡</div>
+    <div class="wrap">
+      <header>
+        <a class="logo" href="/"><span aria-hidden="true">❋</span> tiệm len</a>
+        <nav aria-label="Điều hướng chính">
+          <a href="/#san-pham">Góc trưng bày</a><a href="/community/">Góc chuyện len</a>
+        </nav>
+        <a class="accountlink" id="memberLink" href="/login/">Đăng nhập</a>
+      </header>
+      <main class="community-main">
+        <a class="back-to-shop" href="/community/?mine=1">← Về bài viết của tôi</a>
+        <section class="write-heading">
+          <div class="eyebrow">Một khoảng dành riêng cho bạn</div>
+          <h1 id="writeTitle">Kể một câu chuyện nhỏ</h1>
+          <p>
+            Không cần viết thật hay. Chỉ cần là điều bạn muốn lưu lại: một mũi đan mới học, một món
+            quà hay một buổi chiều bình yên.
+          </p>
+        </section>
+        <p id="writeStatus" role="status" aria-live="polite">Đang mở trang viết…</p>
+        <form id="writeForm" class="write-form" hidden>
+          <label
+            >Tiêu đề<input
+              id="postTitle"
+              required
+              minlength="3"
+              maxlength="160"
+              placeholder="Hôm nay, mình đan…" /></label
+          ><label
+            >Chủ đề<select id="postCategory">
+              <option value="slow">Sống chậm</option>
+              <option value="journey">Hành trình đan</option>
+              <option value="memory">Kỷ niệm</option>
+              <option value="tips">Mẹo nhỏ</option>
+            </select></label
+          ><label
+            >Lời mở đầu (không bắt buộc)<textarea
+              id="postExcerpt"
+              maxlength="240"
+              rows="3"
+              placeholder="Vài dòng để mời mọi người bước vào câu chuyện."
+            ></textarea></label
+          ><label
+            >Ảnh bìa (không bắt buộc)<input
+              id="coverFile"
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+          /></label>
+          <p class="help">Ảnh PNG, JPG hoặc WebP, tối đa 5 MB. Chọn ảnh bạn có quyền chia sẻ.</p>
+          <img id="coverPreview" class="cover-preview" alt="Ảnh bìa đã chọn" hidden /><button
+            type="button"
+            id="removeCover"
+            class="secondary"
+            hidden
+          >
+            Gỡ ảnh bìa</button
+          ><label
+            >Câu chuyện của bạn<textarea
+              id="postContent"
+              required
+              minlength="20"
+              maxlength="8000"
+              rows="14"
+              placeholder="Bắt đầu từ một điều nhỏ thôi…"
+            ></textarea>
+          </label>
+          <p id="characterCount" class="help">0 / 8000 ký tự</p>
+          <p class="help">
+            Bản nháp chỉ bạn xem được. Khi chia sẻ, bài viết và tên của bạn sẽ xuất hiện công khai.
+          </p>
+          <div class="actions">
+            <button id="saveDraft" class="secondary" value="draft">Lưu bản nháp</button
+            ><button id="publishStory" class="primary" value="published">
+              Chia sẻ câu chuyện ♡
+            </button>
+          </div>
+        </form>
+      </main>
+      <footer class="footer">
+        <p>Chậm lại một chút. Đan thêm một hàng.</p>
+        <a href="/community/">Cùng nhau kể chuyện ♡</a>
+      </footer>
+    </div>
+    <script type="module" src="/js/pages/write.js"></script>
+  </body>
+</html>

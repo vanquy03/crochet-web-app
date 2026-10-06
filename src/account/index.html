@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Đơn hàng của tôi • Tiệm Len</title>
+    <link rel="stylesheet" href="/styles/base.css" />
+    <link rel="stylesheet" href="/styles/theme.css" />
+    <link rel="stylesheet" href="/styles/account.css" />
+    <link rel="stylesheet" href="/styles/community.css" />
+  </head>
+  <body>
+    <div class="notice">Một chút len, một khoảng bình yên ♡</div>
+    <main class="wrap account-wrap">
+      <header>
+        <a class="logo" href="/"><span aria-hidden="true">❋</span> tiệm len</a
+        ><a class="back-to-shop" href="/#san-pham">← Về cửa hàng</a>
+      </header>
+      <p class="help form-status" id="historyStatus" role="status" aria-live="polite"></p>
+      <section id="accountContent" hidden>
+        <div class="account-welcome">
+          <div>
+            <div class="eyebrow">Góc nhỏ của bạn</div>
+            <h1>Xin chào, <span id="customerName"></span></h1>
+            <p class="help" id="customerEmail"></p>
+          </div>
+          <button id="customerLogout" class="secondary">Đăng xuất</button>
+        </div>
+        <div class="community-quicklinks">
+          <a class="primary" href="/write/">Viết một câu chuyện</a
+          ><a class="secondary" href="/community/?mine=1">Bài viết của tôi</a
+          ><a class="secondary" href="/community/">Góc chuyện len</a>
+        </div>
+        <div class="history-toolbar">
+          <div>
+            <h2>Đơn hàng của tôi</h2>
+            <p class="help" id="historyCount"></p>
+          </div>
+          <button id="refreshOrders" class="secondary">Cập nhật trạng thái</button>
+        </div>
+        <div id="orderHistory" class="order-history"></div>
+        <div id="historyPagination" class="history-pagination" hidden>
+          <button id="previousOrders" class="secondary">Trang trước</button
+          ><span id="historyPage"></span
+          ><button id="nextOrders" class="secondary">Trang sau</button>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/js/pages/account.js"></script>
+  </body>
+</html>

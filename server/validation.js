@@ -23,7 +23,11 @@ export function productInput(body) {
   if (!/^#[a-f0-9]{6}$/i.test(color) || !/^#[a-f0-9]{6}$/i.test(bg))
     throw new HttpError(400, 'Mã màu không hợp lệ.');
   const image = text(body.imageUrl || '', 'Ảnh', 0, 1000);
-  if (image && !/^\/uploads\/[a-f0-9-]+\.(png|jpg|webp)$/.test(image)) {
+  if (
+    image &&
+    !['/images/handmade-bag.svg', '/images/handmade-scarf.svg'].includes(image) &&
+    !/^\/uploads\/[a-f0-9-]+\.(png|jpg|webp)$/.test(image)
+  ) {
     let url;
     try {
       url = new URL(image);
@@ -35,6 +39,9 @@ export function productInput(body) {
   }
   if (typeof body.active !== 'boolean')
     throw new HttpError(400, 'Trạng thái sản phẩm không hợp lệ.');
+  const kind = body.kind || 'supplies';
+  if (!['supplies', 'handmade'].includes(kind))
+    throw new HttpError(400, 'Nhóm sản phẩm không hợp lệ.');
   return [
     name,
     body.type,
@@ -46,6 +53,7 @@ export function productInput(body) {
     text(body.tag || '', 'Nhãn', 0, 80),
     image,
     Number(body.active),
+    kind,
   ];
 }
 export function customerInput(body) {

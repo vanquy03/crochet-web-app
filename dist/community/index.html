@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Góc chuyện len • Tiệm Len</title>
+    <link rel="stylesheet" href="/styles/base.css" />
+    <link rel="stylesheet" href="/styles/theme.css" />
+    <link rel="stylesheet" href="/styles/account.css" />
+    <link rel="stylesheet" href="/styles/community.css" />
+  </head>
+  <body>
+    <div class="notice">Một chút len, một khoảng bình yên ♡</div>
+    <div class="wrap">
+      <header>
+        <a class="logo" href="/"><span aria-hidden="true">❋</span> tiệm len</a>
+        <nav aria-label="Điều hướng chính">
+          <a href="/#san-pham">Góc trưng bày</a><a href="/community/">Góc chuyện len</a>
+        </nav>
+        <a class="accountlink" id="memberLink" href="/login/">Đăng nhập</a>
+      </header>
+      <main class="community-main">
+        <section class="community-hero">
+          <div class="eyebrow">Những điều nhỏ đáng được kể</div>
+          <h1 id="feedTitle">Góc chuyện len</h1>
+          <p id="feedIntro">
+            Một mũi len, một kỷ niệm. Một nơi để cùng chia sẻ những niềm vui giản dị và học cách
+            sống chậm.
+          </p>
+          <div class="actions">
+            <a class="primary" href="/write/">Viết một câu chuyện ↗</a
+            ><a class="secondary" href="/community/?mine=1">Bài viết của tôi</a>
+          </div>
+        </section>
+        <aside id="joinCommunity" class="community-invite" hidden>
+          Ngồi lại cùng chúng mình nhé. <a href="/register/">Tạo tài khoản</a> để kể chuyện, thả tim
+          và gửi lời chia sẻ.
+        </aside>
+        <div class="feed-toolbar">
+          <div class="filters" role="group" aria-label="Chủ đề">
+            <button class="filter active" data-topic="" aria-pressed="true">Tất cả</button
+            ><button class="filter" data-topic="slow" aria-pressed="false">Sống chậm</button
+            ><button class="filter" data-topic="journey" aria-pressed="false">Hành trình đan</button
+            ><button class="filter" data-topic="memory" aria-pressed="false">Kỷ niệm</button
+            ><button class="filter" data-topic="tips" aria-pressed="false">Mẹo nhỏ</button>
+          </div>
+          <label class="story-search"
+            >Tìm một câu chuyện<input
+              type="search"
+              id="storySearch"
+              maxlength="100"
+              placeholder="Một chiếc khăn, một chiều mưa…"
+          /></label>
+        </div>
+        <p id="feedCount" class="help"></p>
+        <p id="feedStatus" role="status" aria-live="polite"></p>
+        <div id="storyFeed" class="story-grid"></div>
+        <div id="feedPagination" class="history-pagination" hidden>
+          <button id="feedPrevious" class="secondary">Trang trước</button><span id="feedPage"></span
+          ><button id="feedNext" class="secondary">Trang sau</button>
+        </div>
+      </main>
+      <footer class="footer">
+        <p>Chậm lại một chút. Đan thêm một hàng.</p>
+        <a href="/community/">Cùng nhau kể chuyện ♡</a>
+      </footer>
+    </div>
+    <script type="module" src="/js/pages/community.js"></script>
+  </body>
+</html>

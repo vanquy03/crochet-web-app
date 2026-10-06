@@ -1,17 +1,35 @@
-﻿# API cửa hàng
+# API cửa hàng
 
 API cùng origin với website, tiền tính bằng số nguyên VND. Dữ liệu ghi dùng JSON, ảnh dùng multipart/form-data. API không cho phép CORS từ website khác.
 
 ## Công khai
 
-| Method | Endpoint           | Chức năng                                  |
-| ------ | ------------------ | ------------------------------------------ |
-| GET    | /api/health        | Kiểm tra server/database                   |
-| GET    | /api/products      | Sản phẩm đang bán, gồm stock và version    |
-| GET    | /api/products/:id  | Một sản phẩm                               |
-| GET    | /api/settings      | Tên shop, liên hệ, phí giao, thông báo mẫu |
-| POST   | /api/orders        | Đặt COD; cần Idempotency-Key là UUID v4    |
-| POST   | /api/orders/lookup | Tra cứu với id + token, không trả PII      |
+| Method | Endpoint          | Chức năng                                  |
+| ------ | ----------------- | ------------------------------------------ |
+| GET    | /api/health       | Kiểm tra server/database                   |
+| GET    | /api/products     | Sản phẩm đang bán, gồm stock và version    |
+| GET    | /api/products/:id | Một sản phẩm                               |
+| GET    | /api/settings     | Tên shop, liên hệ, phí giao, thông báo mẫu |
+
+## Tài khoản khách và đơn hàng cá nhân
+
+| Method | Endpoint                    | Chức năng                                                         |
+| ------ | --------------------------- | ----------------------------------------------------------------- |
+| POST   | /api/customer/register      | name, email, password; tạo tài khoản và phiên đăng nhập           |
+| POST   | /api/customer/login         | email, password; tạo phiên                                        |
+| GET    | /api/customer/session       | customer + csrfToken hoặc null nếu chưa đăng nhập                 |
+| POST   | /api/customer/logout        | Thu hồi phiên khách                                               |
+| GET    | /api/customer/orders?page=1 | Chỉ đơn thuộc phiên hiện tại, 10 đơn/trang                        |
+| GET    | /api/customer/orders/:id    | Chi tiết đơn thuộc phiên; 404 với đơn của người khác              |
+| POST   | /api/orders                 | Đặt COD với cookie khách, X-CSRF-Token và Idempotency-Key UUID v4 |
+
+Đăng ký/đăng nhập dùng JSON và kiểm tra cùng origin, có giới hạn 20 lần/15 phút theo IP.
+Cookie tiemlen_customer là HttpOnly, SameSite=Strict, Secure ở production; phiên sống 8 giờ.
+Các thao tác ghi sau đăng nhập cần X-CSRF-Token. Tài khoản khách không có quyền admin.
+
+API luôn lấy customer_id từ phiên; giá trị chủ sở hữu gửi trong body/query không được dùng.
+Không còn endpoint /api/orders/lookup. Đơn cũ có customer_id NULL chỉ hiện trong admin.
+Khóa Idempotency-Key của người khác không cho phép lấy lại thông tin đơn.
 
 Body đặt đơn:
 
@@ -27,7 +45,7 @@ Body đặt đơn:
 }
 ```
 
-Server lấy giá và phí giao từ database, không tin giá từng item hoặc total tùy ý từ client. expectedTotal phải khớp để tránh đặt đơn khi giá vừa đổi. Phản hồi: order, lookupToken, replay; 201 cho đơn mới, 200 khi phát lại đơn cũ. Header idempotency là quyền khôi phục kết quả yêu cầu, không chia sẻ hoặc log khóa này.
+Server lấy giá và phí giao từ database, không tin giá từng item hoặc total tùy ý từ client. expectedTotal phải khớp để tránh đặt đơn khi giá vừa đổi. Phản hồi: order, replay; 201 cho đơn mới, 200 khi phát lại đơn cũ. Header idempotency là quyền khôi phục kết quả yêu cầu, không chia sẻ hoặc log khóa này.
 
 ## Quản trị
 

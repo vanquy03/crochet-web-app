@@ -1,4 +1,4 @@
-﻿import test from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
@@ -59,9 +59,14 @@ const { products: samples } = await import('../src/js/data/sample-products.js');
 globalThis.fetch = async (url) => ({
   ok: true,
   json: async () =>
-    url.endsWith('/products')
-      ? samples.map((p) => ({ ...p, stock: 99 }))
-      : { name: 'Tiệm Len', demo: true, shippingFee: 30000, freeShippingThreshold: 500000 },
+    url.endsWith('/customer/session')
+      ? {
+          customer: { id: 77, name: 'Nguyễn Mai', email: 'customer@example.test' },
+          csrfToken: 'test-csrf',
+        }
+      : url.endsWith('/products')
+        ? samples.map((p) => ({ ...p, stock: 99 }))
+        : { name: 'Tiệm Len', demo: true, shippingFee: 30000, freeShippingThreshold: 500000 },
 });
 await import('../src/js/main.js');
 const cart = await import('../src/js/features/cart.js');
@@ -169,7 +174,6 @@ test('checkout retries reuse the key, preserve cart on error and show receipt on
         ok: true,
         json: async () => ({
           order: { id: 'TL-test-order', total: 65000 },
-          lookupToken: 'a'.repeat(64),
         }),
       };
     }
@@ -190,7 +194,8 @@ test('checkout retries reuse the key, preserve cart on error and show receipt on
     assert.equal(cart.cartItems[1], undefined);
     assert.equal(cart.cartItems[2], 1);
     assert.ok(element('orderReceipt').innerHTML.includes('TL-test-order'));
-    assert.equal(element('lookupToken').value, 'a'.repeat(64));
+    assert.ok(element('orderReceipt').innerHTML.includes('/account/'));
+    assert.ok(!element('orderReceipt').innerHTML.includes('Mã tra cứu'));
     assert.equal(stored.get('tiemlen-pending-request'), undefined);
   } finally {
     globalThis.fetch = originalFetch;

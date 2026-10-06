@@ -1,4 +1,4 @@
-﻿# Chạy và quản trị cửa hàng
+# Chạy và quản trị cửa hàng
 
 ## Khởi động local
 
@@ -28,7 +28,7 @@ Database được tạo và migration tự chạy lần đầu tại data/shop.s
 - Đơn chờ xác nhận đã giữ hàng: tồn kho bị trừ trong cùng transaction với việc lưu đơn. Hai khách mua cùng hàng không thể làm tồn âm.
 - Luồng: pending → confirmed → shipping → completed. Hoàn tất cần đánh dấu đã thu tiền.
 - Có thể hủy pending hoặc confirmed. Hủy hoàn lại tồn kho một lần. Đơn đang giao không hỗ trợ hủy; đơn đã thu tiền cần xử lý hoàn tiền rồi bỏ đánh dấu thu tiền trước khi hủy.
-- Khách có mã đơn và mã tra cứu riêng; nên tải phiếu xác nhận. Endpoint tra cứu không trả tên, số điện thoại hoặc địa chỉ người nhận.
+- Khách đăng ký/đăng nhập tại /register/ hoặc /login/, rồi xem đơn của mình tại /account/. Không cần giữ mã tra cứu. Đơn cũ chưa gắn tài khoản vẫn giữ trong admin.
 - Khóa idempotency giữ cùng một đơn khi gửi lại cùng nội dung sau lỗi mạng. Trình duyệt giữ khóa và fingerprint SHA-256 trong sessionStorage; không lưu tên, điện thoại hoặc địa chỉ ở đó.
 - Chủ shop cần kiểm tra đơn chờ và liên hệ xác nhận. Hiện chưa gửi email/SMS tự động, chưa tích hợp cổng thanh toán hoặc tạo vận đơn hãng giao hàng. COD và giao hàng được shop xử lý thủ công.
 
@@ -74,6 +74,6 @@ Nếu quên mật khẩu, người có quyền terminal trên máy chủ có th�
 
 ## Giới hạn vận hành
 
-Đây là cửa hàng cá nhân dùng COD. Không có tài khoản khách, giảm giá, quản lý biến thể nhiều màu trong một sản phẩm, trả hàng/hoàn tiền tự động hoặc phí giao tính theo hãng. Hãy tạo mỗi màu/quy cách thành một sản phẩm riêng. Đơn chờ không tự hết hạn; chủ shop phải xác nhận hoặc hủy để giải phóng hàng.
+Đây là cửa hàng cá nhân dùng COD. Tài khoản khách hỗ trợ đăng ký, đăng nhập và lịch sử đơn riêng. Chưa có xác thực email, khôi phục mật khẩu, giảm giá, quản lý biến thể nhiều màu trong một sản phẩm, trả hàng/hoàn tiền tự động hoặc phí giao tính theo hãng. Hãy tạo mỗi màu/quy cách thành một sản phẩm riêng. Đơn chờ không tự hết hạn; chủ shop phải xác nhận hoặc hủy để giải phóng hàng.
 
-Login có giới hạn số lần thử; đặt đơn và tra cứu cũng giới hạn theo IP. Thông tin khách chỉ hiện với quản trị đã đăng nhập. Không đưa file database/backup vào thư mục public, Git hoặc ảnh tải lên.
+Login có giới hạn số lần thử; đặt đơn cũng giới hạn theo IP. Thông tin giao hàng chỉ hiện với quản trị hoặc chính khách sở hữu đơn đã đăng nhập. Không đưa file database/backup vào thư mục public, Git hoặc ảnh tải lên.

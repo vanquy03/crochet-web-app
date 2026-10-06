@@ -12,7 +12,10 @@ export function renderCatalog() {
   const q = $('search').value.trim().toLocaleLowerCase('vi');
   let shown = products.filter(
     (p) =>
-      (filter === 'all' || p.type === filter) &&
+      (filter === 'all' ||
+        (filter === 'handmade'
+          ? p.kind === 'handmade'
+          : p.type === filter && p.kind !== 'handmade')) &&
       (p.name + ' ' + p.desc).toLocaleLowerCase('vi').includes(q),
   );
   if ($('sort').value === 'asc') shown.sort((a, b) => a.price - b.price);
@@ -34,11 +37,12 @@ export function renderCatalog() {
             <div>
               <h3><button class="producttitle" data-detail="${p.id}">${p.name}</button></h3>
               <p>${p.desc}</p>
+              ${backendAvailable && p.stock === 0 ? '<span class="stock-note">Tạm hết hàng</span>' : ''}
             </div>
             <button
               class="add"
               data-add="${p.id}"
-              aria-label="Thêm ${p.name} vào giỏ"
+              aria-label="${backendAvailable && p.stock === 0 ? 'Tạm hết hàng: ' : 'Thêm vào giỏ: '}${p.name}"
               ${backendAvailable && p.stock === 0 ? 'disabled' : ''}
             >
               +
@@ -53,6 +57,7 @@ export function showProductDetail(id) {
   const raw = products.find((p) => p.id === Number(id));
   const p = raw && safeProduct(raw);
   if (!p) return;
+  const soldOut = backendAvailable && p.stock === 0;
   $('detailContent').innerHTML = /* HTML */ `<div class="detailgrid">
     <div class="productart" style="--bg:${p.bg}">${renderProductArt(p, 'detail')}</div>
     <div>
@@ -69,7 +74,9 @@ export function showProductDetail(id) {
         <dt>Quy cách mẫu</dt>
         <dd>${p.desc}</dd>
         <dt>Tình trạng</dt>
-        <dd>${backendAvailable ? `Còn ${p.stock} sản phẩm` : 'Bản xem giao diện'}</dd>
+        <dd>
+          ${soldOut ? 'Tạm hết hàng' : backendAvailable ? `Còn ${p.stock} sản phẩm` : 'Bản xem giao diện'}
+        </dd>
       </dl>
       <label class="help" for="detailQty">Số lượng</label>
       <div class="detailactions">
@@ -78,13 +85,17 @@ export function showProductDetail(id) {
           id="detailQty"
           type="number"
           min="1"
-          max="${Math.min(99, p.stock || 0)}"
+          max="${Math.max(1, Math.min(99, p.stock || 0))}"
+          ${soldOut ? 'disabled' : ''}
           value="1"
           required
-        /><button class="primary" id="detailAdd">Thêm vào giỏ</button
+        /><button class="primary" id="detailAdd">
+          ${soldOut ? 'Tạm hết hàng' : 'Thêm vào giỏ'}</button
         ><button class="secondary" id="detailBuy">Đặt hàng</button>
       </div>
-      <p class="help">Màu có thể khác tùy màn hình. Vui lòng hỏi tiệm khi cần ảnh thực tế.</p>
+      <p class="help">
+        ${soldOut ? 'Sản phẩm này hiện chưa có hàng. Bạn có thể chọn sản phẩm còn hàng hoặc liên hệ tiệm để hỏi thời gian bổ sung.' : 'Màu có thể khác tùy màn hình. Vui lòng hỏi tiệm khi cần ảnh thực tế.'}
+      </p>
     </div>
   </div>`;
   $('detailAdd').disabled = $('detailBuy').disabled = backendAvailable && p.stock === 0;
@@ -96,7 +107,7 @@ export function showProductDetail(id) {
   $('detailBuy').onclick = () => {
     const input = $('detailQty');
     if (!input.reportValidity() || !Number.isInteger(input.valueAsNumber)) return;
-    addToCart(p.id, input.valueAsNumber);
+    if (!addToCart(p.id, input.valueAsNumber, true)) return;
     $('detail').close();
     $('cart').showModal();
   };

@@ -3,7 +3,12 @@
   --cream: #fff9f7;
   --green: #995569;
   --muted: #816b72;
-  --line: #eadbdc;
+  --line: #e6d9db;
+  --surface: #fffefd;
+  --soft: #fcf0f2;
+  --field-hover: #c8a0ac;
+  --focus: #995569;
+  --focus-halo: #9955691a;
 }
 body {
   background-image: radial-gradient(#d5a4b21a 0.7px, transparent 0.7px);
@@ -92,14 +97,6 @@ body {
   gap: 10px;
   align-items: center;
 }
-select {
-  padding: 12px 10px;
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  background: white;
-  color: var(--ink);
-  font-size: 12px;
-}
 .contact {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -187,10 +184,6 @@ select {
 }
 .detailqty {
   width: 75px;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  color: var(--ink);
 }
 .buyer {
   display: grid;
@@ -204,15 +197,10 @@ select {
 }
 .buyer input,
 .buyer textarea {
-  border: 1px solid var(--line);
-  padding: 12px;
-  background: #fffcfa;
-  border-radius: 7px;
   width: 100%;
-  color: var(--ink);
 }
 .buyer textarea {
-  min-height: 75px;
+  min-height: 96px;
   resize: vertical;
 }
 #orderChannels {
@@ -325,4 +313,180 @@ html {
 }
 .buyer select {
   width: 100%;
+}
+
+/* Softer surfaces and consistent spacing around the shopping flow. */
+.catalogtools {
+  min-width: 0;
+}
+.catalogtools > * {
+  min-width: 0;
+}
+.grid article {
+  min-width: 0;
+  padding: 12px 12px 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+}
+.grid .meta {
+  padding: 16px 4px 12px;
+}
+.grid .meta > div {
+  min-width: 0;
+}
+.grid .price {
+  padding: 0 4px;
+}
+.add {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+}
+.primary,
+.secondary {
+  border-radius: 10px;
+  line-height: 1.5;
+}
+.secondary:hover:not(:disabled),
+.cartbutton:hover:not(:disabled),
+.filter:hover:not(.active):not(:disabled),
+.qty button:hover:not(:disabled) {
+  background: var(--soft);
+  border-color: var(--field-hover);
+}
+nav a:hover {
+  color: var(--green);
+}
+dialog {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 24px 80px #573d4526;
+  scrollbar-gutter: stable;
+}
+dialog::backdrop {
+  background: #573d4559;
+}
+.dialoghead {
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.dialoghead h2 {
+  margin: 0;
+}
+.close {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: var(--muted);
+}
+.close:hover {
+  background: var(--soft);
+  color: var(--green);
+}
+.buyer label {
+  line-height: 1.5;
+  font-weight: 500;
+}
+.buyer :is(input, textarea, select) {
+  font-weight: 400;
+}
+.qty button {
+  min-width: 34px;
+  min-height: 34px;
+  border-radius: 8px;
+  color: var(--ink);
+}
+.total {
+  margin: 14px 0;
+  gap: 16px;
+  font-size: 14px;
+  font-weight: 400;
+}
+.total > span:last-child {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.total-final {
+  padding: 14px 16px;
+  background: var(--soft);
+  border-radius: 12px;
+  font-weight: 600;
+}
+#submitOrder {
+  width: 100%;
+}
+#cart > .actions:last-child {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+#cart > .actions:last-child .primary {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+#cart > .actions:last-child .primary:hover {
+  background: var(--soft);
+}
+#serviceStatus:empty,
+#checkoutStatus:empty {
+  display: none;
+}
+.receipt {
+  border: 1px solid var(--line);
+  background: var(--soft);
+  line-height: 1.7;
+}
+.receipt code {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 12px;
+}
+.faq summary {
+  line-height: 1.7;
+}
+@media (max-width: 760px) {
+  .grid article {
+    padding: 8px 8px 14px;
+    border-radius: 14px;
+  }
+  .grid .meta {
+    align-items: start;
+    gap: 8px;
+    padding: 12px 0 10px;
+  }
+  .grid .price {
+    padding: 0;
+  }
+  .grid .add {
+    width: 36px;
+    height: 36px;
+  }
+  .catalogtools .search {
+    flex: 1 1 100%;
+  }
+  dialog {
+    padding: 20px;
+    max-height: 88dvh;
+  }
+}
+
+.stock-note {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 11px;
+}
+#cartAvailability:empty {
+  display: none;
 }

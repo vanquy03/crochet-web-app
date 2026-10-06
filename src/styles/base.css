@@ -4,6 +4,11 @@
   --green: #355747;
   --muted: #6b7469;
   --line: #e3e4d9;
+  --surface: #ffffff;
+  --soft: #f1f4ed;
+  --field-hover: #a2b39a;
+  --focus: #557749;
+  --focus-halo: #5577491f;
 }
 * {
   box-sizing: border-box;
@@ -16,9 +21,11 @@ body {
   background: var(--cream);
   color: var(--ink);
   font-family: Arial, sans-serif;
+  line-height: 1.5;
 }
 button,
 input,
+textarea,
 select {
   font: inherit;
 }
@@ -35,6 +42,116 @@ a {
 button {
   cursor: pointer;
 }
+
+/* Shared form controls: a quiet focus state without changing border width. */
+:where(
+  input:not([type='checkbox']):not([type='radio']):not([type='color']):not([type='file']),
+  textarea,
+  select
+) {
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 11px 14px;
+  background: var(--surface);
+  color: var(--ink);
+  line-height: 1.5;
+  font-size: 14px;
+}
+input,
+textarea,
+select {
+  font-size: 14px;
+  accent-color: var(--green);
+  caret-color: var(--green);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 0.85;
+}
+:is(input, textarea, select):not(:disabled):hover {
+  border-color: var(--field-hover);
+}
+:is(input, textarea, select):not(:disabled):focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px var(--focus-halo);
+}
+:is(a, button, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+}
+:is(input, textarea, select):user-invalid {
+  border-color: #ad5261;
+}
+:is(input, textarea, select):disabled {
+  background: var(--soft);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+:is(button, .primary, .secondary, .filter, .cartbutton) {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+input[type='checkbox'],
+input[type='radio'] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+input[type='color'] {
+  min-height: 46px;
+  padding: 5px;
+}
+input[type='file'] {
+  font-size: 13px;
+}
+input[type='file']::file-selector-button {
+  margin-right: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--soft);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+@media (max-width: 760px) {
+  :is(input, textarea, select) {
+    font-size: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  input,
+  textarea,
+  select,
+  button,
+  .primary,
+  .secondary,
+  .filter,
+  .cartbutton {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  :is(input, textarea, select):not(:disabled):focus,
+  :is(a, button, summary, [tabindex]):focus-visible {
+    outline: 2px solid Highlight;
+    box-shadow: none;
+  }
+}
+
 .wrap {
   max-width: 1180px;
   margin: auto;
@@ -172,10 +289,6 @@ nav {
   font-size: 14px;
 }
 .search {
-  border: 1px solid var(--line);
-  background: white;
-  border-radius: 7px;
-  padding: 12px;
   width: 230px;
 }
 .filters {

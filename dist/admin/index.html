@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="vi">
   <head>
     <meta charset="utf-8" />
@@ -15,9 +15,10 @@
         ><button id="logout" class="secondary" hidden>Đăng xuất</button>
       </header>
       <p id="message" role="status"></p>
-      <section id="loginPanel">
-        <h1>Đăng nhập quản trị</h1>
-        <p class="help">Dùng tài khoản đã tạo bằng lệnh admin:create.</p>
+      <section id="loginPanel" aria-labelledby="loginTitle">
+        <div class="eyebrow">Góc nhỏ của chủ tiệm</div>
+        <h1 id="loginTitle">Chào mừng bạn trở lại</h1>
+        <p class="help">Đăng nhập để chăm chút sản phẩm và theo dõi đơn hàng của tiệm.</p>
         <form id="loginForm" class="buyer">
           <label>Email<input name="email" type="email" autocomplete="username" required /></label
           ><label
@@ -34,6 +35,7 @@
         <nav class="tabs" aria-label="Các mục quản trị">
           <button data-tab="products" class="secondary">Sản phẩm</button
           ><button data-tab="orders" class="secondary">Đơn hàng</button
+          ><button data-tab="community" class="secondary">Chuyện len</button
           ><button data-tab="settings" class="secondary">Cài đặt shop</button
           ><button data-tab="account" class="secondary">Tài khoản</button>
         </nav>
@@ -64,7 +66,7 @@
         <section id="ordersPanel" hidden>
           <div class="panelhead">
             <h2>Đơn hàng</h2>
-            <select id="orderFilter">
+            <select id="orderFilter" aria-label="Lọc theo trạng thái đơn hàng">
               <option value="">Tất cả</option>
               <option value="pending">Chờ xác nhận</option>
               <option value="confirmed">Đã xác nhận</option>
@@ -91,6 +93,20 @@
             <button id="prevPage" class="secondary">Trang trước</button><span id="pageInfo"></span
             ><button id="nextPage" class="secondary">Trang sau</button>
           </div>
+        </section>
+        <section id="communityPanel" hidden>
+          <h2>Chuyện len của cộng đồng</h2>
+          <p class="help">
+            Ẩn bài hoặc bình luận khi cần. Bản nháp thuộc không gian riêng của tác giả.
+          </p>
+          <div id="communityRows"></div>
+          <div class="actions">
+            <button id="communityPrev" class="secondary">Trang trước</button
+            ><span id="communityPage"></span
+            ><button id="communityNext" class="secondary">Trang sau</button>
+          </div>
+          <h3>Lời chia sẻ của bài được chọn</h3>
+          <div id="moderationComments"></div>
         </section>
         <section id="settingsPanel" hidden>
           <h2>Cài đặt cửa hàng</h2>
@@ -147,7 +163,12 @@
         <button data-close="productDialog" class="close" aria-label="Đóng">×</button>
       </div>
       <form id="productForm" class="buyer formgrid">
-        <label>Tên sản phẩm<input name="name" required minlength="2" maxlength="120" /></label
+        <label
+          >Nhóm sản phẩm<select name="kind">
+            <option value="handmade">Đồ len thủ công</option>
+            <option value="supplies">Len và dụng cụ</option>
+          </select></label
+        ><label>Tên sản phẩm<input name="name" required minlength="2" maxlength="120" /></label
         ><label
           >Loại<select name="type">
             <option value="cotton">Cotton</option>

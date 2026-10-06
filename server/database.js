@@ -1,4 +1,4 @@
-﻿import { DatabaseSync } from 'node:sqlite';
+import { DatabaseSync } from 'node:sqlite';
 import { readFileSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { products as sampleProducts } from '../src/js/data/sample-products.js';
@@ -18,7 +18,7 @@ export function openDatabase(filename) {
   const db = new DatabaseSync(filename);
   db.exec('PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;');
   const version = db.prepare('PRAGMA user_version').get().user_version;
-  if (version > 1) throw new Error('Database version is newer than this application.');
+  if (version > 3) throw new Error('Database version is newer than this application.');
   if (version === 0) {
     db.exec('BEGIN IMMEDIATE');
     try {
@@ -41,6 +41,20 @@ export function openDatabase(filename) {
       throw error;
     }
   }
+  if (version < 2) {
+    try {
+      transaction(db, () =>
+        db.exec(readFileSync(new URL('./migrations/002-customers.sql', import.meta.url), 'utf8')),
+      );
+    } catch (error) {
+      db.close();
+      throw error;
+    }
+  }
+  if (version < 3)
+    transaction(db, () =>
+      db.exec(readFileSync(new URL('./migrations/003-community.sql', import.meta.url), 'utf8')),
+    );
   return db;
 }
 export function transaction(db, operation) {
@@ -62,6 +76,7 @@ export function publicProduct(row) {
     id: row.id,
     name: row.name,
     type: row.type,
+    kind: row.kind,
     desc: row.description,
     price: row.price,
     stock: row.stock,

@@ -118,7 +118,15 @@ function editProduct(id) {
   $('productTitle').textContent = editing ? 'Sửa sản phẩm' : 'Thêm sản phẩm';
   fill(
     $('productForm'),
-    editing || { price: 0, stock: 0, active: true, color: '#c69592', bg: '#f1e4df', imageUrl: '' },
+    editing || {
+      kind: 'handmade',
+      price: 0,
+      stock: 0,
+      active: true,
+      color: '#c69592',
+      bg: '#f1e4df',
+      imageUrl: '',
+    },
   );
   $('productDialog').showModal();
 }
@@ -147,9 +155,10 @@ document.querySelectorAll('[data-tab]').forEach(
     (button.onclick = async () => {
       document.querySelectorAll('[data-tab]').forEach((b) => b.removeAttribute('aria-current'));
       button.setAttribute('aria-current', 'page');
-      for (const tab of ['products', 'orders', 'settings', 'account'])
+      for (const tab of ['products', 'orders', 'community', 'settings', 'account'])
         $(tab + 'Panel').hidden = tab !== button.dataset.tab;
       try {
+        if (button.dataset.tab === 'community') await loadCommunity();
         if (button.dataset.tab === 'orders') await loadOrders();
         if (button.dataset.tab === 'products') await loadProducts();
         await loadDashboard();
@@ -297,3 +306,137 @@ try {
 } catch {
   showLogin();
 }
+
+let communityPage = 1,
+  communityPages = 1,
+  communityPosts = [];
+async function loadCommunity() {
+  const result = await request('/community/posts?page=' + communityPage);
+  communityPage = result.page;
+  communityPages = result.pages;
+  communityPosts = result.posts;
+  $('communityRows').innerHTML =
+    result.posts
+      .map(
+        (p) =>
+          '<article class="guide"><h3>' +
+          h(p.title) +
+          '</h3><p>' +
+          h(p.author.name) +
+          ' · ' +
+          h(p.status) +
+          '</p><p>' +
+          h(p.excerpt) +
+          '</p><div class="actions">' +
+          (['published', 'hidden'].includes(p.status)
+            ? '<button class="secondary" data-moderate="' +
+              p.id +
+              '">' +
+              (p.status === 'hidden' ? 'Hiện lại bài' : 'Ẩn bài') +
+              '</button>'
+            : '') +
+          '<button class="secondary" data-comments="' +
+          p.id +
+          '">Xem bình luận</button></div></article>',
+      )
+      .join('') || '<p>Chưa có bài viết.</p>';
+  $('communityPage').textContent = 'Trang ' + communityPage + '/' + communityPages;
+  $('communityPrev').disabled = communityPage <= 1;
+  $('communityNext').disabled = communityPage >= communityPages;
+}
+async function moderationComments(id, page = 1) {
+  const result = await request('/community/posts/' + id + '/comments?page=' + page);
+  $('moderationComments').innerHTML =
+    result.comments
+      .map(
+        (c) =>
+          '<article class="guide"><strong>' +
+          h(c.author.name) +
+          '</strong><p style="white-space:pre-wrap">' +
+          h(c.content) +
+          '</p>' +
+          (c.hidden
+            ? '<small>Đã ẩn</small>'
+            : '<button class="secondary" data-hide-comment="' +
+              c.id +
+              '" data-post="' +
+              id +
+              '">Ẩn bình luận</button>') +
+          '</article>',
+      )
+      .join('') || '<p>Chưa có bình luận.</p>';
+  if (result.pages > 1)
+    $('moderationComments').innerHTML +=
+      '<div class="actions">' +
+      (result.page > 1
+        ? '<button class="secondary" data-comment-page="' +
+          (result.page - 1) +
+          '" data-post="' +
+          id +
+          '">Trang trước</button>'
+        : '') +
+      '<span>Trang ' +
+      result.page +
+      '/' +
+      result.pages +
+      '</span>' +
+      (result.page < result.pages
+        ? '<button class="secondary" data-comment-page="' +
+          (result.page + 1) +
+          '" data-post="' +
+          id +
+          '">Trang sau</button>'
+        : '') +
+      '</div>';
+}
+$('communityRows').onclick = async (e) => {
+  const button = e.target.closest('button');
+  if (!button) return;
+  try {
+    if (button.dataset.moderate) {
+      const p = communityPosts.find((p) => p.id === Number(button.dataset.moderate));
+      await request('/community/posts/' + p.id, {
+        method: 'PATCH',
+        body: JSON.stringify({ hidden: p.status !== 'hidden', version: p.version }),
+      });
+      await loadCommunity();
+      message('Đã cập nhật bài viết.');
+    }
+    if (button.dataset.comments) await moderationComments(button.dataset.comments);
+  } catch (error) {
+    message(error.message);
+  }
+};
+$('moderationComments').onclick = async (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  try {
+    if (b.dataset.hideComment) {
+      await request('/community/posts/' + b.dataset.post + '/comments/' + b.dataset.hideComment, {
+        method: 'DELETE',
+        body: '{}',
+      });
+      await moderationComments(b.dataset.post);
+    }
+    if (b.dataset.commentPage)
+      await moderationComments(b.dataset.post, Number(b.dataset.commentPage));
+  } catch (error) {
+    message(error.message);
+  }
+};
+$('communityPrev').onclick = async () => {
+  communityPage--;
+  try {
+    await loadCommunity();
+  } catch (e) {
+    message(e.message);
+  }
+};
+$('communityNext').onclick = async () => {
+  communityPage++;
+  try {
+    await loadCommunity();
+  } catch (e) {
+    message(e.message);
+  }
+};

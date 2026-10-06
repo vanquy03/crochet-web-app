@@ -1,20 +1,21 @@
-﻿import { api } from '../services/api.js';
+import { api } from '../services/api.js';
 import { loadProducts, products } from '../data/products.js';
 import { renderCart, cartItems } from './cart.js';
 import { renderCatalog } from './catalog.js';
 import { $, formatMoney } from '../utils/dom.js';
 import { escapeHTML } from '../utils/html.js';
+import {
+  customer,
+  customerCsrf,
+  loadCustomerSession,
+  loginRequired,
+  clearCustomer,
+} from '../services/customer.js';
 import { shop, backendAvailable } from '../config/shop.js';
-const labels = {
-  pending: 'Chờ xác nhận',
-  confirmed: 'Đã xác nhận',
-  shipping: 'Đang giao',
-  completed: 'Hoàn tất',
-  cancelled: 'Đã hủy',
-};
 let submitting = false,
   pendingRequest = null;
 export function initCheckout() {
+  if (customer && !$('buyerName').value) $('buyerName').value = customer.name;
   try {
     pendingRequest = JSON.parse(sessionStorage.getItem('tiemlen-pending-request') || 'null');
   } catch {
@@ -23,6 +24,13 @@ export function initCheckout() {
   $('buyerForm').onsubmit = async (event) => {
     event.preventDefault();
     if (submitting || !backendAvailable) return;
+    try {
+      await loadCustomerSession();
+    } catch {
+      $('checkoutStatus').textContent = 'Không kết nối được cửa hàng. Vui lòng thử lại.';
+      return;
+    }
+    if (submitting || loginRequired('/?cart=1')) return;
     if (!$('buyerForm').reportValidity() || !Object.keys(cartItems).length) return;
     const subtotal = products.reduce((sum, p) => sum + p.price * (cartItems[p.id] || 0), 0);
     const fee =
@@ -49,7 +57,7 @@ export function initCheckout() {
       const { expectedTotal, ...identity } = body;
       const hash = await crypto.subtle.digest(
         'SHA-256',
-        new TextEncoder().encode(JSON.stringify(identity)),
+        new TextEncoder().encode(JSON.stringify({ customerId: customer.id, ...identity })),
       );
       const fingerprint = Array.from(new Uint8Array(hash), (byte) =>
         byte.toString(16).padStart(2, '0'),
@@ -63,14 +71,14 @@ export function initCheckout() {
       }
       const result = await api('/orders', {
         method: 'POST',
-        headers: { 'Idempotency-Key': pendingRequest.key },
+        headers: { 'Idempotency-Key': pendingRequest.key, 'X-CSRF-Token': customerCsrf },
         body: JSON.stringify(body),
       });
       const order = result.order;
       $('orderReceipt').innerHTML =
-        `<div class="receipt"><strong>Đã nhận đơn hàng của bạn</strong><p>Mã đơn:</p><code>${escapeHTML(order.id)}</code><p>Mã tra cứu riêng (hãy lưu lại):</p><code>${escapeHTML(result.lookupToken)}</code><p>Tổng COD: ${formatMoney(order.total)}</p><button type="button" class="secondary" id="saveReceipt">Tải thông tin đơn</button></div>`;
+        `<div class="receipt"><strong>Đã nhận đơn hàng của bạn</strong><p>Mã đơn:</p><code>${escapeHTML(order.id)}</code><p><a href="/account/">Xem đơn hàng của tôi →</a></p><p>Tổng COD: ${formatMoney(order.total)}</p><button type="button" class="secondary" id="saveReceipt">Tải thông tin đơn</button></div>`;
       $('saveReceipt').onclick = () => {
-        const body = `TIỆM LEN\nMã đơn: ${order.id}\nMã tra cứu: ${result.lookupToken}\nTổng COD: ${formatMoney(order.total)}\nGiữ riêng mã tra cứu để xem trạng thái trên website.`;
+        const body = `TIỆM LEN\nMã đơn: ${order.id}\nTổng COD: ${formatMoney(order.total)}\nĐăng nhập website để xem lịch sử và trạng thái đơn.`;
         const url = URL.createObjectURL(
           new Blob(['\uFEFF' + body], { type: 'text/plain;charset=utf-8' }),
         );
@@ -80,8 +88,6 @@ export function initCheckout() {
         link.click();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       };
-      $('lookupId').value = order.id;
-      $('lookupToken').value = result.lookupToken;
       for (const item of body.items) {
         const remaining = (cartItems[item.productId] || 0) - item.quantity;
         if (remaining > 0) cartItems[item.productId] = remaining;
@@ -103,6 +109,11 @@ export function initCheckout() {
         /* Đơn đã lưu dù tải lại danh mục thất bại. */
       }
     } catch (error) {
+      if (error.status === 401) {
+        clearCustomer();
+        loginRequired('/?cart=1');
+        return;
+      }
       $('checkoutStatus').textContent = error.message;
       try {
         await loadProducts();
@@ -114,27 +125,6 @@ export function initCheckout() {
     } finally {
       submitting = false;
       renderCart();
-    }
-  };
-  $('lookupForm').onsubmit = async (event) => {
-    event.preventDefault();
-    const button = event.currentTarget.querySelector('button');
-    button.disabled = true;
-    $('lookupResult').textContent = 'Đang tra cứu…';
-    try {
-      const order = await api('/orders/lookup', {
-        method: 'POST',
-        body: JSON.stringify({
-          id: $('lookupId').value.trim(),
-          token: $('lookupToken').value.trim(),
-        }),
-      });
-      $('lookupResult').innerHTML =
-        `<div class="receipt"><strong>${escapeHTML(labels[order.status] || order.status)}</strong><p>${escapeHTML(order.id)}</p><p>Tổng COD: ${formatMoney(order.total)} · ${order.paid ? 'Đã thu tiền' : 'Chưa thu tiền'}</p><ul>${order.items.map((item) => `<li>${escapeHTML(item.name)} × ${item.quantity}</li>`).join('')}</ul></div>`;
-    } catch (error) {
-      $('lookupResult').textContent = error.message;
-    } finally {
-      button.disabled = false;
     }
   };
 }

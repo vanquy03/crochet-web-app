@@ -1,13 +1,15 @@
-﻿import test from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { DatabaseSync } from 'node:sqlite';
+import { mkdtemp, rm, readFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { openDatabase } from '../server/database.js';
 import { createApp } from '../server/app.js';
-import { hashPassword } from '../server/security.js';
+import { spawnSync } from 'node:child_process';
+import { hashPassword, verifyPassword } from '../server/security.js';
 
 async function fixture(t, { file = false, production = false } = {}) {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'tiem-len-api-'));
@@ -66,9 +68,46 @@ async function fixture(t, { file = false, production = false } = {}) {
     expectedTotal: quantity * 35000 + 30000,
     items: [{ productId: 1, quantity }],
   });
+  const customerLogin = await call('/api/customer/register', {
+    method: 'POST',
+    body: {
+      name: 'Nguyễn Mai',
+      email: 'customer@example.test',
+      password: 'Customer-password-123!',
+    },
+  });
+  assert.equal(customerLogin.status, 201);
+  const customerHeaders = {
+    Cookie: customerLogin.response.headers.get('set-cookie').split(';')[0],
+    'X-CSRF-Token': customerLogin.data.csrfToken,
+  };
+  const customerId = customerLogin.data.customer.id;
+  const customer = (route, options = {}) =>
+    call('/api/customer' + route, {
+      ...options,
+      headers: { ...customerHeaders, ...options.headers },
+    });
   const place = (body, key = randomUUID()) =>
-    call('/api/orders', { method: 'POST', body, headers: { 'Idempotency-Key': key } });
-  return { db, filename, directory, call, admin, headers, stock, orderBody, place, base };
+    call('/api/orders', {
+      method: 'POST',
+      body,
+      headers: { ...customerHeaders, 'Idempotency-Key': key },
+    });
+  return {
+    db,
+    filename,
+    directory,
+    call,
+    admin,
+    headers,
+    stock,
+    orderBody,
+    place,
+    base,
+    customer,
+    customerHeaders,
+    customerId,
+  };
 }
 
 test('authentication, CSRF, same-origin and secure production cookies', async (t) => {
@@ -167,26 +206,14 @@ test('checkout computes prices, reserves stock and retries without duplicate ord
   const replay = await f.place(body, key);
   assert.equal(replay.status, 200);
   assert.equal(replay.data.order.id, first.data.order.id);
-  assert.equal(replay.data.lookupToken, first.data.lookupToken);
+  assert.equal(replay.data.lookupToken, undefined);
   assert.equal(f.db.prepare('SELECT stock FROM products WHERE id=1').get().stock, 1);
   assert.equal(f.db.prepare('SELECT count(*) AS n FROM orders').get().n, 1);
   assert.equal((await f.place(f.orderBody(1), key)).status, 409);
-  const lookup = await f.call('/api/orders/lookup', {
-    method: 'POST',
-    body: { id: first.data.order.id, token: first.data.lookupToken },
-  });
-  assert.equal(lookup.status, 200);
-  assert.equal(lookup.data.phone, undefined);
-  assert.equal(lookup.data.address, undefined);
-  assert.equal(
-    (
-      await f.call('/api/orders/lookup', {
-        method: 'POST',
-        body: { id: first.data.order.id, token: 'a'.repeat(64) },
-      })
-    ).status,
-    404,
-  );
+  const own = await f.customer('/orders/' + first.data.order.id);
+  assert.equal(own.status, 200);
+  assert.equal(own.data.phone, body.phone);
+  assert.equal((await f.customer('/orders')).data.total, 1);
 });
 
 test('invalid totals, duplicate items, insufficient stock and transaction rollback', async (t) => {
@@ -402,4 +429,454 @@ test('malformed and oversized JSON return client errors without exposing interna
   });
   assert.equal(large.status, 413);
   assert.equal((await large.json()).stack, undefined);
+});
+
+test('customer registration, sessions, CSRF and separation from admin access', async (t) => {
+  const f = await fixture(t, { production: true });
+  assert.equal((await f.call('/api/customer/session')).data.customer, null);
+  assert.equal((await f.call('/api/customer/orders')).status, 401);
+  assert.equal((await f.call('/api/orders', { method: 'POST', body: f.orderBody() })).status, 401);
+  assert.equal((await f.call('/api/customer/orders', { headers: f.headers })).status, 401);
+  assert.equal((await f.call('/api/admin/orders', { headers: f.customerHeaders })).status, 401);
+  const registerBody = {
+    name: 'Khách mới',
+    email: 'SECOND@EXAMPLE.TEST',
+    password: 'Customer-password-123!',
+  };
+  const created = await f.call('/api/customer/register', { method: 'POST', body: registerBody });
+  assert.equal(created.status, 201);
+  assert.equal(created.data.customer.email, 'second@example.test');
+  assert.equal(created.data.customer.password_hash, undefined);
+  assert.match(created.response.headers.get('set-cookie'), /HttpOnly/);
+  assert.match(created.response.headers.get('set-cookie'), /SameSite=Strict/);
+  assert.match(created.response.headers.get('set-cookie'), /Secure/);
+  const stored = f.db.prepare('SELECT * FROM customers WHERE email=?').get('second@example.test');
+  assert.notEqual(stored.password_hash, registerBody.password);
+  assert.equal(
+    (await f.call('/api/customer/register', { method: 'POST', body: registerBody })).status,
+    409,
+  );
+  assert.equal(
+    (
+      await f.call('/api/customer/register', {
+        method: 'POST',
+        body: { ...registerBody, email: 'bad' },
+      })
+    ).status,
+    400,
+  );
+  assert.equal(
+    (
+      await f.call('/api/customer/register', {
+        method: 'POST',
+        body: { ...registerBody, email: 'third@example.test', password: 'short' },
+      })
+    ).status,
+    400,
+  );
+  assert.equal(
+    (
+      await f.call('/api/customer/login', {
+        method: 'POST',
+        body: { email: registerBody.email, password: 'wrong' },
+      })
+    ).status,
+    401,
+  );
+  const logged = await f.call('/api/customer/login', { method: 'POST', body: registerBody });
+  assert.equal(logged.status, 200);
+  const cookie = logged.response.headers.get('set-cookie').split(';')[0];
+  assert.equal(
+    (
+      await f.call('/api/customer/logout', {
+        method: 'POST',
+        body: {},
+        headers: { Cookie: cookie },
+      })
+    ).status,
+    403,
+  );
+  const session = await f.call('/api/customer/session', { headers: { Cookie: cookie } });
+  assert.equal(session.data.customer.id, stored.id);
+  assert.equal(
+    (
+      await f.call('/api/customer/logout', {
+        method: 'POST',
+        body: {},
+        headers: {
+          Cookie: cookie,
+          'X-CSRF-Token': logged.data.csrfToken,
+          Origin: 'https://other.test',
+        },
+      })
+    ).status,
+    403,
+  );
+  assert.equal(
+    (
+      await f.call('/api/customer/logout', {
+        method: 'POST',
+        body: {},
+        headers: { Cookie: cookie, 'X-CSRF-Token': logged.data.csrfToken },
+      })
+    ).status,
+    200,
+  );
+  assert.equal((await f.call('/api/customer/orders', { headers: { Cookie: cookie } })).status, 401);
+  f.db.prepare('UPDATE customer_sessions SET expires_at=0').run();
+  assert.equal((await f.customer('/orders')).status, 401);
+  assert.equal((await f.admin('/orders')).status, 200);
+});
+
+test('customers can only read their own orders and cannot steal idempotency keys', async (t) => {
+  const f = await fixture(t);
+  await f.stock(5);
+  const key = randomUUID();
+  const placed = await f.place({ ...f.orderBody(), customerId: 9999 }, key);
+  assert.equal(placed.status, 201);
+  assert.equal(placed.data.order.customer_id, f.customerId);
+  assert.equal(placed.data.lookupToken, undefined);
+  const other = await f.call('/api/customer/register', {
+    method: 'POST',
+    body: { name: 'Khách khác', email: 'other@example.test', password: 'Other-password-123!' },
+  });
+  const otherHeaders = {
+    Cookie: other.response.headers.get('set-cookie').split(';')[0],
+    'X-CSRF-Token': other.data.csrfToken,
+  };
+  assert.equal(
+    (await f.call('/api/customer/orders/' + placed.data.order.id, { headers: otherHeaders }))
+      .status,
+    404,
+  );
+  const otherList = await f.call('/api/customer/orders?customer_id=' + f.customerId, {
+    headers: otherHeaders,
+  });
+  assert.equal(otherList.data.total, 0);
+  assert.deepEqual(otherList.data.orders, []);
+  const stolen = await f.call('/api/orders', {
+    method: 'POST',
+    body: f.orderBody(),
+    headers: { ...otherHeaders, 'Idempotency-Key': key },
+  });
+  assert.equal(stolen.status, 409);
+  assert.equal(stolen.data.order, undefined);
+  assert.equal((await f.place(f.orderBody(), key)).status, 200);
+  assert.equal(
+    (
+      await f.call('/api/orders', {
+        method: 'POST',
+        body: f.orderBody(),
+        headers: { Cookie: f.customerHeaders.Cookie, 'Idempotency-Key': randomUUID() },
+      })
+    ).status,
+    403,
+  );
+  f.db.prepare('UPDATE orders SET customer_id=NULL WHERE id=?').run(placed.data.order.id);
+  assert.equal((await f.customer('/orders')).data.total, 0);
+  assert.equal((await f.customer('/orders/' + placed.data.order.id)).status, 404);
+  assert.equal((await f.admin('/orders')).data.total, 1);
+  assert.equal((await f.call('/api/orders/lookup', { method: 'POST', body: {} })).status, 404);
+});
+
+test('customer order history is paginated and reflects admin status updates', async (t) => {
+  const f = await fixture(t);
+  await f.stock(20);
+  let id;
+  for (let i = 0; i < 11; i++) {
+    const placed = await f.place(f.orderBody());
+    assert.equal(placed.status, 201);
+    id = placed.data.order.id;
+  }
+  const first = (await f.customer('/orders')).data;
+  const second = (await f.customer('/orders?page=2')).data;
+  assert.equal(first.total, 11);
+  assert.equal(first.orders.length, 10);
+  assert.equal(second.orders.length, 1);
+  assert.equal(new Set([...first.orders, ...second.orders].map((o) => o.id)).size, 11);
+  assert.equal((await f.customer('/orders?page=0')).status, 400);
+  await f.admin('/orders/' + id, { method: 'PATCH', body: { status: 'confirmed', paid: false } });
+  assert.equal((await f.customer('/orders/' + id)).data.status, 'confirmed');
+});
+
+test('v1 migration preserves existing orders without assigning them to a new customer', async (t) => {
+  const f = await fixture(t);
+  const filename = path.join(f.directory, 'legacy.sqlite');
+  const legacy = new DatabaseSync(filename);
+  legacy.exec(
+    await readFile(new URL('../server/migrations/001-initial.sql', import.meta.url), 'utf8'),
+  );
+  legacy
+    .prepare(
+      'INSERT INTO orders(id,lookup_hash,idempotency_key,request_hash,name,phone,address,subtotal,shipping_fee,total) VALUES(?,?,?,?,?,?,?,?,?,?)',
+    )
+    .run(
+      'TL-legacy',
+      'a'.repeat(64),
+      randomUUID(),
+      'b'.repeat(64),
+      'Khách cũ',
+      '0900000000',
+      'Địa chỉ thử nghiệm cũ',
+      35000,
+      30000,
+      65000,
+    );
+  legacy.close();
+  const migrated = openDatabase(filename);
+  assert.equal(migrated.prepare('PRAGMA user_version').get().user_version, 3);
+  const order = migrated.prepare('SELECT * FROM orders WHERE id=?').get('TL-legacy');
+  assert.equal(order.total, 65000);
+  assert.equal(order.customer_id, null);
+  migrated.close();
+  const reopened = openDatabase(filename);
+  assert.equal(reopened.prepare('SELECT COUNT(*) AS n FROM customers').get().n, 0);
+  reopened.close();
+});
+
+test('seed customer owns test orders and repeated seeding preserves edited data', async (t) => {
+  const f = await fixture(t);
+  const filename = path.join(f.directory, 'shop.sqlite');
+  const run = () =>
+    spawnSync(process.execPath, ['scripts/seed.mjs'], {
+      encoding: 'utf8',
+      env: { ...process.env, NODE_ENV: 'test', DATA_DIR: f.directory },
+    });
+  let result = run();
+  assert.equal(result.status, 0, result.stderr);
+  const db = openDatabase(filename);
+  try {
+    const customer = db.prepare('SELECT * FROM customers WHERE email=?').get('user@tiemlen.test');
+    assert.ok(verifyPassword('UserTest123!', customer.password_hash));
+    assert.equal(
+      db.prepare('SELECT COUNT(*) AS n FROM orders WHERE customer_id=?').get(customer.id).n,
+      5,
+    );
+    assert.equal(db.prepare('SELECT stock FROM products WHERE id=10001').get().stock, 42);
+    const oldInventory = JSON.stringify(
+      db.prepare('SELECT * FROM inventory_log ORDER BY id').all(),
+    );
+    db.prepare('UPDATE customers SET password_hash=? WHERE id=?').run(
+      hashPassword('NewCustomer123!'),
+      customer.id,
+    );
+    db.prepare('UPDATE products SET name=? WHERE id=10001').run('Sản phẩm đã sửa');
+    result = run();
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(db.prepare('SELECT COUNT(*) AS n FROM orders').get().n, 5);
+    assert.ok(
+      verifyPassword(
+        'NewCustomer123!',
+        db.prepare('SELECT password_hash FROM customers WHERE id=?').get(customer.id).password_hash,
+      ),
+    );
+    assert.equal(
+      db.prepare('SELECT name FROM products WHERE id=10001').get().name,
+      'Sản phẩm đã sửa',
+    );
+    assert.equal(
+      JSON.stringify(db.prepare('SELECT * FROM inventory_log ORDER BY id').all()),
+      oldInventory,
+    );
+    const forbidden = spawnSync(process.execPath, ['scripts/seed.mjs'], {
+      encoding: 'utf8',
+      env: { ...process.env, NODE_ENV: 'production', DATA_DIR: f.directory },
+    });
+    assert.equal(forbidden.status, 1);
+  } finally {
+    db.close();
+  }
+});
+
+test('customer authentication limits repeated failed login attempts', async (t) => {
+  const f = await fixture(t);
+  let result;
+  for (let i = 0; i < 20; i++)
+    result = await f.call('/api/customer/login', {
+      method: 'POST',
+      body: { email: 'customer@example.test', password: 'wrong' },
+    });
+  assert.equal(result.status, 429);
+});
+
+test('community drafts stay private, ownership and versions protect editing', async (t) => {
+  const f = await fixture(t),
+    body = {
+      title: 'Một chiều đan len',
+      content: 'Mình ngồi bên cửa sổ và đan thêm một hàng len thật chậm.',
+      category: 'slow',
+      status: 'draft',
+    };
+  const member = (route, options = {}) =>
+    f.call('/api/community' + route, {
+      ...options,
+      headers: { ...f.customerHeaders, ...options.headers },
+    });
+  assert.equal((await f.call('/api/community/posts', { method: 'POST', body })).status, 401);
+  assert.equal(
+    (await member('/posts', { method: 'POST', body, headers: { 'X-CSRF-Token': 'bad' } })).status,
+    403,
+  );
+  const draft = await member('/posts', { method: 'POST', body });
+  assert.equal(draft.status, 201);
+  const id = draft.data.id;
+  assert.equal((await f.call('/api/community/posts')).data.total, 0);
+  assert.equal((await f.call('/api/community/posts/' + id)).status, 404);
+  assert.equal((await f.admin('/community/posts')).data.total, 0);
+  assert.equal((await f.customer('/posts')).data.total, 1);
+  const second = await f.call('/api/customer/register', {
+    method: 'POST',
+    body: {
+      name: 'Bạn đan len',
+      email: 'otherblog@example.test',
+      password: 'Other-blog-password123!',
+    },
+  });
+  const otherHeaders = {
+    Cookie: second.response.headers.get('set-cookie').split(';')[0],
+    'X-CSRF-Token': second.data.csrfToken,
+  };
+  assert.equal((await f.call('/api/community/posts/' + id, { headers: otherHeaders })).status, 404);
+  assert.equal(
+    (
+      await f.call('/api/community/posts/' + id, {
+        method: 'PUT',
+        headers: otherHeaders,
+        body: { ...body, version: 0 },
+      })
+    ).status,
+    404,
+  );
+  const published = await member('/posts/' + id, {
+    method: 'PUT',
+    body: { ...body, status: 'published', version: 0 },
+  });
+  assert.equal(published.status, 200);
+  assert.equal(
+    (
+      await member('/posts/' + id, {
+        method: 'PUT',
+        body: { ...body, status: 'published', version: 0 },
+      })
+    ).status,
+    409,
+  );
+  const feed = (await f.call('/api/community/posts?category=slow&q=đan')).data;
+  assert.equal(feed.total, 1);
+  assert.equal(feed.posts[0].author.email, undefined);
+  assert.equal(feed.posts[0].content, undefined);
+  assert.equal((await f.call('/api/community/posts/' + id)).data.content, body.content);
+  assert.equal(
+    (
+      await f.call('/api/community/posts/' + id, {
+        method: 'DELETE',
+        headers: otherHeaders,
+        body: {},
+      })
+    ).status,
+    404,
+  );
+  assert.equal((await member('/posts/' + id, { method: 'DELETE', body: {} })).status, 200);
+  assert.equal((await member('/posts/' + id)).status, 404);
+});
+test('community hearts are idempotent, comments owned and moderation guarded', async (t) => {
+  const f = await fixture(t);
+  const member = (route, options = {}) =>
+    f.call('/api/community' + route, {
+      ...options,
+      headers: { ...f.customerHeaders, ...options.headers },
+    });
+  const post = await member('/posts', {
+    method: 'POST',
+    body: {
+      title: 'Một mũi len nhỏ',
+      content: 'Một mũi đan mới mang lại niềm vui giản dị cho mình hôm nay.',
+      category: 'journey',
+      status: 'published',
+    },
+  });
+  const id = post.data.id;
+  for (let i = 0; i < 2; i++)
+    assert.equal(
+      (await member('/posts/' + id + '/like', { method: 'PUT', body: { liked: true } })).data
+        .likesCount,
+      1,
+    );
+  assert.equal(
+    (await member('/posts/' + id + '/like', { method: 'PUT', body: { liked: false } })).data
+      .likesCount,
+    0,
+  );
+  const comment = await member('/posts/' + id + '/comments', {
+    method: 'POST',
+    body: { content: 'Mình cũng thích đan len bên cửa sổ ♡' },
+  });
+  assert.equal(comment.status, 201);
+  const comments = await member('/posts/' + id + '/comments');
+  assert.equal(comments.data.total, 1);
+  assert.equal(comments.data.comments[0].mine, true);
+  assert.equal(comments.data.comments[0].author.email, undefined);
+  assert.equal(
+    (await f.call('/api/admin/community/posts', { headers: f.customerHeaders })).status,
+    401,
+  );
+  assert.equal(
+    (
+      await f.admin('/community/posts/' + id, {
+        method: 'PATCH',
+        body: { hidden: true, version: 0 },
+      })
+    ).status,
+    200,
+  );
+  assert.equal((await f.call('/api/community/posts/' + id)).status, 404);
+  assert.equal(
+    (await member('/posts/' + id + '/like', { method: 'PUT', body: { liked: true } })).status,
+    404,
+  );
+  assert.equal(
+    (
+      await member('/posts/' + id, {
+        method: 'PUT',
+        body: { ...post.data, status: 'published', version: 1 },
+      })
+    ).status,
+    403,
+  );
+  assert.equal(
+    (
+      await f.admin('/community/posts/' + id + '/comments/' + comment.data.id, {
+        method: 'DELETE',
+        body: {},
+      })
+    ).status,
+    200,
+  );
+  assert.equal(
+    (
+      await f.admin('/community/posts/' + id, {
+        method: 'PATCH',
+        body: { hidden: false, version: 1 },
+      })
+    ).status,
+    200,
+  );
+  assert.equal((await member('/posts/' + id + '/comments')).data.total, 0);
+  const own = await member('/posts/' + id + '/comments', {
+    method: 'POST',
+    body: { content: 'Lời chia sẻ thứ hai' },
+  });
+  assert.equal(
+    (await member('/posts/' + id + '/comments/' + own.data.id, { method: 'DELETE', body: {} }))
+      .status,
+    200,
+  );
+  const form = new FormData();
+  form.append('image', new Blob(['<svg/>'], { type: 'image/svg+xml' }), 'bad.svg');
+  const upload = await fetch(f.base + '/api/community/uploads', {
+    method: 'POST',
+    headers: f.customerHeaders,
+    body: form,
+  });
+  assert.equal(upload.status, 400);
 });

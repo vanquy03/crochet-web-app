@@ -1,4 +1,4 @@
-﻿export async function api(path, options = {}) {
+export async function api(path, options = {}) {
   const response = await fetch('/api' + path, {
     credentials: 'same-origin',
     ...options,
@@ -15,6 +15,10 @@
   } catch {
     throw new Error('Không kết nối được dịch vụ cửa hàng.');
   }
-  if (!response.ok) throw new Error(data.error || 'Yêu cầu chưa thành công.');
+  if (!response.ok) {
+    const error = new Error(data.error || 'Yêu cầu chưa thành công.');
+    error.status = response.status;
+    throw error;
+  }
   return data;
 }
