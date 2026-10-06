@@ -57,7 +57,10 @@
             <div>
               <div class="eyebrow">Góc nhỏ của người yêu len</div>
               <h2>Những điều tự tay làm</h2>
-              <p>Đồ len thủ công, những cuộn sợi và cảm hứng cho dự án tiếp theo.</p>
+              <p class="handmade-note">
+                Các sản phẩm trưng bày đều do tiệm tự tay đan móc. Tiệm cũng nhận đan theo yêu cầu —
+                <a href="#mua-hang">liên hệ để cùng làm nên món đồ bạn muốn nhé.</a>
+              </p>
             </div>
             <div class="catalogtools">
               <label class="sr-only" for="sort">Sắp xếp sản phẩm</label
@@ -94,37 +97,100 @@
               mũi móc đầu tiên hay đã có cả một giỏ dự án, mong bạn tìm thấy ở đây một màu sắc khiến
               mình muốn bắt đầu.
             </p>
-            <a href="#san-pham">Chọn màu cho dự án tiếp theo →</a>
           </div>
         </section>
         <section class="section">
-          <div class="home-stories-heading">
-            <div>
-              <div class="eyebrow">Cùng ngồi lại một chút</div>
+          <div class="home-stories-heading story-invitation">
+            <div class="story-invitation-copy">
+              <div class="eyebrow">
+                <span class="invitation-mark" aria-hidden="true">♡</span> Cùng ngồi lại một chút
+              </div>
               <h2>Những câu chuyện bên giỏ len</h2>
-              <p>Kỷ niệm, trải nghiệm và niềm vui từ những mũi đan nhỏ.</p>
+              <p class="invitation-lead">Hãy chia sẻ câu chuyện của bạn với chúng mình.</p>
+              <p class="invitation-description">
+                Một món quà tự tay làm, những mũi móc đầu tiên hay một ngày bình yên bên giỏ len —
+                chúng mình rất muốn nghe bạn kể.
+              </p>
             </div>
-            <a href="/community/">Ghé Góc chuyện len →</a>
+            <div class="story-invitation-actions">
+              <a class="primary" href="/write/"
+                >Chia sẻ câu chuyện của bạn <span aria-hidden="true">↗</span></a
+              >
+              <a class="invitation-read" href="/community/"
+                >Đọc chuyện của mọi người <span aria-hidden="true">→</span></a
+              >
+              <p class="invitation-note">Chỉ vài dòng thôi cũng đủ để bắt đầu.</p>
+            </div>
           </div>
+          <h3 class="home-stories-label">Chuyện mới từ cộng đồng</h3>
           <p id="homeStoriesStatus" class="help" role="status"></p>
           <div id="homeStories" class="story-grid"></div>
         </section>
-        <section class="section contact" id="mua-hang">
-          <div>
-            <div class="eyebrow">もしもし · Chào bạn</div>
-            <h2>Cùng chọn len nhé?</h2>
+        <section
+          class="section contact contact-feature"
+          id="mua-hang"
+          aria-labelledby="contactTitle"
+        >
+          <div class="contact-intro">
+            <div class="eyebrow">
+              <span class="contact-heading-icon" aria-hidden="true"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M21 11a8 8 0 0 1-8 8H8l-5 3 1.5-6A8 8 0 1 1 21 11Z" />
+                  <path d="M8 10h8M8 14h5" /></svg
+              ></span>
+              Một lời nhắn, một ý tưởng mới
+            </div>
+            <h2 id="contactTitle">Bạn có ý tưởng,<br />tiệm có đôi tay.</h2>
             <p>
-              Gửi cho tiệm sản phẩm bạn thích để hỏi màu và số lượng còn hàng. Một dự án nhỏ bắt đầu
-              từ một cuộc trò chuyện.
+              Muốn một món đồ len mang dấu ấn của riêng bạn? Gửi mẫu hoặc kể cho tiệm nghe ý tưởng —
+              chúng mình cùng chọn màu, kiểu dáng và làm nên món đồ bạn yêu nhé.
             </p>
-            <div class="actions" id="contactLinks"></div>
-            <p class="help" id="contactStatus"></p>
+            <div class="contact-service-tag">
+              <span aria-hidden="true">♡</span> Sản phẩm tự tay làm · Nhận đan móc theo yêu cầu
+            </div>
+            <div
+              id="contactLinks"
+              class="contact-channels"
+              aria-label="Các cách liên hệ với tiệm"
+            ></div>
+            <p class="help" id="contactStatus" role="status"></p>
           </div>
-          <div class="guide">
-            <h3>Đặt len thật đơn giản</h3>
-            <p><b>01</b> Đăng nhập hoặc đăng ký, rồi chọn sản phẩm và thêm vào giỏ.</p>
-            <p><b>02</b> Điền địa chỉ và đặt hàng COD trong giỏ.</p>
-            <p><b>03</b> Xem trạng thái và lịch sử trong Đơn hàng của tôi.</p>
+          <div class="guide custom-order-guide">
+            <div class="eyebrow">Từ ý tưởng đến món đồ</div>
+            <h3>Đặt riêng, thật đơn giản</h3>
+            <ol>
+              <li>
+                <span class="custom-step" aria-hidden="true">01</span>
+                <div>
+                  <strong>Kể tiệm nghe ý tưởng</strong>
+                  <p>Gửi hình mẫu hoặc mô tả món đồ bạn muốn làm.</p>
+                </div>
+              </li>
+              <li>
+                <span class="custom-step" aria-hidden="true">02</span>
+                <div>
+                  <strong>Cùng chọn từng chi tiết</strong>
+                  <p>Trao đổi màu sắc, kích thước, giá và thời gian hoàn thành.</p>
+                </div>
+              </li>
+              <li>
+                <span class="custom-step" aria-hidden="true">03</span>
+                <div>
+                  <strong>Tiệm bắt đầu đan móc</strong>
+                  <p>Sau khi thống nhất, tiệm tự tay làm món đồ dành riêng cho bạn.</p>
+                </div>
+              </li>
+            </ol>
+            <a class="contact-browse" href="#san-pham"
+              >Hoặc chọn một món đồ có sẵn <span aria-hidden="true">→</span></a
+            >
           </div>
         </section>
         <section class="faq">
@@ -162,8 +228,7 @@
           <p><span id="footerContact">Thông tin shop đang được cập nhật.</span></p>
         </div>
         <div>
-          Bản mẫu website · 2026<br />
-          <p>Hình ảnh minh họa, không phải ảnh sản phẩm thực tế.</p>
+          <p>Sản phẩm tự tay làm, hình ảnh thực tế 100%.</p>
         </div>
       </footer>
     </div>

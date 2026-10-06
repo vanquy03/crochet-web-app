@@ -28,6 +28,9 @@ function element(id) {
       close() {
         this.open = false;
       },
+      querySelector() {
+        return null;
+      },
       reset() {},
       reportValidity() {
         return true;

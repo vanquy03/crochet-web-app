@@ -1,11 +1,33 @@
+import { escapeHTML as h } from '../utils/html.js';
 import { shop } from '../config/shop.js';
 import { $ } from '../utils/dom.js';
 import { cartItems } from './cart.js';
 import { createOrderText, copyOrder } from './order.js';
+const contactIcons = {
+  zalo: '<path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 10 10 0 0 1-4-.9L3 21l1.4-4.5A8.5 8.5 0 0 1 3 11.5a9 9 0 0 1 18 0Z"/><path d="M9 8h6l-6 7h6"/>',
+  facebook:
+    '<path d="M14 21v-8h3l.5-4H14V7c0-1 .4-2 2-2h2V1.5A24 24 0 0 0 15 1c-3 0-5 2-5 5v3H7v4h3v8Z"/>',
+  email: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="m3 7 9 6 9-6"/>',
+  phone:
+    '<path d="M8 3H4a1 1 0 0 0-1 1c0 9.4 7.6 17 17 17a1 1 0 0 0 1-1v-4l-5-2-2 2a14 14 0 0 1-6-6l2-2-2-5Z"/>',
+};
 function createContactLink(name, url, container, orderMode = false) {
   const b = document.createElement(orderMode ? 'button' : 'a');
-  b.className = 'secondary';
-  b.textContent = name;
+  const kind = url.startsWith('mailto:')
+    ? 'email'
+    : url.startsWith('tel:')
+      ? 'phone'
+      : url.includes('zalo.me')
+        ? 'zalo'
+        : 'facebook';
+  const descriptions = {
+    zalo: 'Gửi mẫu, trao đổi ý tưởng',
+    facebook: 'Ghé tiệm và nhắn tin',
+    email: shop.email,
+    phone: url.slice(4),
+  };
+  b.className = orderMode ? 'secondary contact-order-link' : 'contact-channel contact-' + kind;
+  b.innerHTML = `<span class="contact-channel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${contactIcons[kind]}</svg></span><span class="contact-channel-copy"><strong>${h(name)}</strong>${orderMode ? '' : `<small>${h(descriptions[kind])}</small>`}</span>${orderMode ? '' : `<span class="contact-channel-arrow" aria-hidden="true">${kind === 'phone' || kind === 'email' ? '→' : '↗'}</span>`}`;
   if (orderMode) {
     b.dataset.orderChannel = name;
     b.onclick = () => {

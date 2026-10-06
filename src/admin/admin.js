@@ -9,6 +9,8 @@ const statusLabels = {
   completed: 'Hoàn tất',
   cancelled: 'Đã hủy',
 };
+let mediaItems = [],
+  uploadingMedia = false;
 let csrf = '',
   products = [],
   editing = null,
@@ -128,6 +130,11 @@ function editProduct(id) {
       imageUrl: '',
     },
   );
+  mediaItems = (
+    editing?.media ||
+    (editing?.imageUrl ? [{ type: 'image', url: editing.imageUrl, primary: true }] : [])
+  ).map((item) => ({ ...item }));
+  renderMediaEditor();
   $('productDialog').showModal();
 }
 $('loginForm').onsubmit = (event) => {
@@ -185,31 +192,101 @@ $('productRows').onclick = async (event) => {
     }
   }
 };
-$('imageFile').onchange = async (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-  const button = $('productForm').querySelector('button');
-  button.disabled = true;
-  $('productError').textContent = 'Đang tải ảnh…';
+function renderMediaEditor() {
+  $('productMedia').innerHTML = mediaItems
+    .map(
+      (item, i) => `<article class="admin-media-item">
+    ${item.type === 'image' ? `<img src="${h(item.url)}" alt="Ảnh sản phẩm ${i + 1}">` : `<video src="${h(item.url)}" controls playsinline preload="metadata"></video>`}
+    <div class="media-item-actions">${item.type === 'image' ? `<label class="check"><input type="radio" name="primaryMedia" value="${i}" ${item.primary ? 'checked' : ''}>Ảnh chính</label>` : '<span>Video</span>'}
+    <button type="button" class="secondary" data-media-up="${i}" ${i === 0 ? 'disabled' : ''} aria-label="Đưa file ${i + 1} lên trước">↑</button>
+    <button type="button" class="secondary" data-media-down="${i}" ${i === mediaItems.length - 1 ? 'disabled' : ''} aria-label="Đưa file ${i + 1} ra sau">↓</button>
+    <button type="button" class="secondary" data-media-remove="${i}">Gỡ</button></div>
+  </article>`,
+    )
+    .join('');
+}
+function addMedia(item) {
+  if (mediaItems.length >= 12) throw new Error('Tối đa 12 ảnh/video.');
+  if (mediaItems.some((existing) => existing.url === item.url))
+    throw new Error('File này đã có trong gallery.');
+  mediaItems.push({
+    ...item,
+    primary: item.type === 'image' && !mediaItems.some((existing) => existing.primary),
+  });
+  renderMediaEditor();
+}
+$('productMedia').onchange = (event) => {
+  if (event.target.name !== 'primaryMedia') return;
+  mediaItems.forEach((item, i) => (item.primary = i === Number(event.target.value)));
+};
+$('productMedia').onclick = (event) => {
+  if (uploadingMedia) return;
+  const button = event.target.closest('button');
+  if (!button) return;
+  if (button.dataset.mediaRemove !== undefined) {
+    mediaItems.splice(Number(button.dataset.mediaRemove), 1);
+    if (!mediaItems.some((item) => item.primary)) {
+      const first = mediaItems.find((item) => item.type === 'image');
+      if (first) first.primary = true;
+    }
+  } else {
+    const up = button.dataset.mediaUp !== undefined;
+    const index = Number(up ? button.dataset.mediaUp : button.dataset.mediaDown);
+    const target = index + (up ? -1 : 1);
+    if (target < 0 || target >= mediaItems.length) return;
+    [mediaItems[index], mediaItems[target]] = [mediaItems[target], mediaItems[index]];
+  }
+  renderMediaEditor();
+};
+$('addMediaUrl').onclick = () => {
+  if (uploadingMedia) return;
   try {
-    if (file.size > 5 * 1024 * 1024) throw new Error('Ảnh tối đa 5 MB.');
-    const data = new FormData();
-    data.append('image', file);
-    const result = await request('/uploads', { method: 'POST', body: data });
-    $('productForm').elements.imageUrl.value = result.imageUrl;
-    $('productError').textContent = 'Đã tải ảnh, nhấn Lưu sản phẩm để sử dụng.';
+    const url = new URL($('mediaUrl').value.trim());
+    if (url.protocol !== 'https:' || url.username || url.password)
+      throw new Error('URL phải dùng HTTPS.');
+    addMedia({ url: url.href, type: $('mediaType').value });
+    $('mediaUrl').value = '';
+    $('productError').textContent = '';
+  } catch (error) {
+    $('productError').textContent = error.message;
+  }
+};
+$('imageFile').onchange = async (event) => {
+  const files = [...event.target.files];
+  if (!files.length || uploadingMedia) return;
+  uploadingMedia = true;
+  const button = $('productForm').querySelector('.primary');
+  button.disabled = true;
+  try {
+    if (files.length + mediaItems.length > 12) throw new Error('Tối đa 12 ảnh/video.');
+    for (const [i, file] of files.entries()) {
+      const video = file.type.startsWith('video/');
+      if (file.size > (video ? 30 : 5) * 1024 * 1024)
+        throw new Error(video ? 'Video tối đa 30 MB.' : 'Ảnh tối đa 5 MB.');
+      $('productError').textContent = `Đang tải file ${i + 1} / ${files.length}…`;
+      const data = new FormData();
+      data.append('file', file);
+      addMedia(await request('/media', { method: 'POST', body: data }));
+    }
+    $('productError').textContent = 'Đã tải file, nhấn Lưu sản phẩm để sử dụng.';
   } catch (error) {
     $('productError').textContent = error.message;
   } finally {
+    uploadingMedia = false;
     button.disabled = false;
+    event.target.value = '';
   }
 };
 $('productForm').onsubmit = (event) => {
   event.preventDefault();
+  if (uploadingMedia) return;
   busy(
     event.currentTarget,
     async () => {
       const data = formData($('productForm'));
+      data.media = mediaItems;
+      data.imageUrl = mediaItems.find((item) => item.primary)?.url || '';
+      delete data.primaryMedia;
       if (editing) data.version = editing.version;
       await request('/products' + (editing ? '/' + editing.id : ''), {
         method: editing ? 'PUT' : 'POST',

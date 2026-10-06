@@ -23,20 +23,28 @@ export function productInput(body) {
   if (!/^#[a-f0-9]{6}$/i.test(color) || !/^#[a-f0-9]{6}$/i.test(bg))
     throw new HttpError(400, 'Mã màu không hợp lệ.');
   const image = text(body.imageUrl || '', 'Ảnh', 0, 1000);
-  if (
-    image &&
-    !['/images/handmade-bag.svg', '/images/handmade-scarf.svg'].includes(image) &&
-    !/^\/uploads\/[a-f0-9-]+\.(png|jpg|webp)$/.test(image)
-  ) {
-    let url;
-    try {
-      url = new URL(image);
-    } catch {
-      throw new HttpError(400, 'URL ảnh không hợp lệ.');
-    }
-    if (url.protocol !== 'https:' || url.username || url.password)
-      throw new HttpError(400, 'Ảnh phải dùng HTTPS.');
-  }
+  validateMediaUrl(image, 'image');
+  const media =
+    body.media === undefined
+      ? image
+        ? [{ type: 'image', url: image, primary: true }]
+        : []
+      : body.media;
+  if (!Array.isArray(media) || media.length > 12)
+    throw new HttpError(400, 'Tối đa 12 ảnh/video cho mỗi sản phẩm.');
+  const normalized = media.map((item) => {
+    if (!item || !['image', 'video'].includes(item.type) || typeof item.primary !== 'boolean')
+      throw new HttpError(400, 'Ảnh/video không hợp lệ.');
+    const url = text(item.url, 'URL ảnh/video', 1, 1000);
+    validateMediaUrl(url, item.type);
+    if (item.primary && item.type !== 'image')
+      throw new HttpError(400, 'Ảnh chính phải là hình ảnh.');
+    return { type: item.type, url, primary: item.primary };
+  });
+  if (normalized.length && normalized.filter((item) => item.primary).length !== 1)
+    throw new HttpError(400, 'Chọn duy nhất một ảnh chính.');
+  if (new Set(normalized.map((item) => item.url)).size !== normalized.length)
+    throw new HttpError(400, 'Ảnh/video không được trùng nhau.');
   if (typeof body.active !== 'boolean')
     throw new HttpError(400, 'Trạng thái sản phẩm không hợp lệ.');
   const kind = body.kind || 'supplies';
@@ -51,9 +59,10 @@ export function productInput(body) {
     color,
     bg,
     text(body.tag || '', 'Nhãn', 0, 80),
-    image,
+    normalized.find((item) => item.primary)?.url || '',
     Number(body.active),
     kind,
+    JSON.stringify(normalized),
   ];
 }
 export function customerInput(body) {
@@ -80,4 +89,26 @@ export function secret(value, label, min = 1, max = 200) {
   if (typeof value !== 'string' || value.length < min || value.length > max)
     throw new HttpError(400, label + ' không hợp lệ.');
   return value;
+}
+
+export function validateMediaUrl(value, type) {
+  if (!value) return;
+  if (
+    type === 'image' &&
+    ['/images/handmade-bag.svg', '/images/handmade-scarf.svg'].includes(value)
+  )
+    return;
+  const local =
+    type === 'image'
+      ? /^\/uploads\/[a-f0-9-]+\.(png|jpg|webp)$/
+      : /^\/uploads\/[a-f0-9-]+\.(mp4|webm)$/;
+  if (local.test(value)) return;
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new HttpError(400, 'URL ảnh/video không hợp lệ.');
+  }
+  if (url.protocol !== 'https:' || url.username || url.password)
+    throw new HttpError(400, 'Ảnh/video phải dùng HTTPS.');
 }

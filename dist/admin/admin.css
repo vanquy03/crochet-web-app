@@ -7,14 +7,10 @@
   gap: 20px;
 }
 .adminwrap h1 {
-  font:
-    36px Georgia,
-    serif;
+  font: 36px var(--font-heading);
 }
 .adminwrap h2 {
-  font:
-    28px Georgia,
-    serif;
+  font: 28px var(--font-heading);
 }
 .metrics {
   display: grid;
@@ -276,4 +272,66 @@ td .secondary {
   border-radius: 12px;
   background: var(--soft);
   line-height: 1.7;
+}
+
+.media-editor {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.media-url {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block: 14px;
+}
+.media-url input {
+  flex: 1 1 180px;
+  min-width: 0;
+  width: auto;
+}
+.admin-media-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.admin-media-item {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  min-width: 0;
+}
+.admin-media-item > img,
+.admin-media-item > video {
+  display: block;
+  width: 100%;
+  height: 150px;
+  object-fit: contain;
+  background: var(--soft);
+  border-radius: 8px;
+}
+.media-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.media-item-actions .check {
+  display: flex;
+  width: 100%;
+}
+.media-item-actions .secondary {
+  padding: 8px 12px;
+  min-height: 44px;
+}
+@media (max-width: 650px) {
+  .admin-media-list {
+    grid-template-columns: 1fr;
+  }
+  .formgrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .media-url > * {
+    max-width: 100%;
+  }
 }

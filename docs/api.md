@@ -71,3 +71,11 @@ Các API sau cần cookie phiên; thao tác ghi còn cần header X-CSRF-Token.
 Sản phẩm: name, type (cotton/milk/tools), desc, price, stock, color và bg dạng #RRGGBB, tag, imageUrl, active boolean. PUT cần version để chặn việc lưu đè tồn kho đã thay đổi bởi đơn mới hoặc admin khác.
 
 Lỗi trả JSON với error, dùng 400/401/403/404/409/415/429. Không gửi stack trace hoặc dữ liệu database trong phản hồi lỗi.
+
+## Ảnh và video sản phẩm
+
+Sản phẩm có `media`: mảng tối đa 12 phần tử `{ type: "image" | "video", url: string, primary: boolean }`. Mảng có nội dung phải có đúng một ảnh `primary: true`; video không được chọn làm ảnh chính. URL không trùng nhau, dùng HTTPS hoặc đường dẫn upload hợp lệ. `imageUrl` trả về URL ảnh chính để dùng trong catalog. Yêu cầu cũ không gửi `media` sẽ tạo gallery từ `imageUrl`; gửi `media: []` xóa gallery. PUT vẫn yêu cầu `version`.
+
+`POST /api/admin/media`: multipart trường `file`, yêu cầu phiên admin và CSRF. Nhận PNG/JPG/WebP tối đa 5 MB hoặc MP4/WebM tối đa 30 MB, trả `201 { url, type }`. Kiểm tra chữ ký file; không chuyển mã hay kiểm tra thời lượng video. Endpoint upload ảnh cũ được giữ để tương thích. File video phục vụ HTTP Range để tua.
+
+Bài cộng đồng `status: "draft"` có thể lưu khi nội dung còn trống hoặc ngắn; tiêu đề trống được đặt là “Câu chuyện chưa đặt tên”. Chia sẻ (`published`) vẫn yêu cầu tiêu đề từ 3 ký tự và nội dung từ 20 ký tự.

@@ -51,7 +51,7 @@ export function createApp({
       if (origin && origin !== expected)
         return next(new HttpError(403, 'Nguồn yêu cầu không hợp lệ.'));
       if (
-        !['/admin/uploads', '/community/uploads'].includes(req.path) &&
+        !['/admin/uploads', '/admin/media', '/community/uploads'].includes(req.path) &&
         !req.is('application/json')
       )
         return next(new HttpError(415, 'Yêu cầu phải dùng JSON.'));
@@ -105,7 +105,9 @@ export function createApp({
         status === 500
           ? 'Có lỗi hệ thống. Vui lòng thử lại.'
           : error instanceof multer.MulterError
-            ? 'Ảnh tối đa 5 MB, mỗi lần một ảnh.'
+            ? req.path === '/api/admin/media'
+              ? 'Ảnh tối đa 5 MB, video tối đa 30 MB; mỗi lần một file.'
+              : 'Ảnh tối đa 5 MB, mỗi lần một ảnh.'
             : error.status === 400 && !(error instanceof HttpError)
               ? 'Nội dung JSON không hợp lệ.'
               : error.message,

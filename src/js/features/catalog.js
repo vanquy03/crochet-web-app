@@ -1,3 +1,4 @@
+import { galleryHTML, initGallery } from '../components/product-gallery.js';
 import { products } from '../data/products.js';
 import { $, formatMoney } from '../utils/dom.js';
 import { renderProductArt } from '../components/artwork.js';
@@ -59,7 +60,7 @@ export function showProductDetail(id) {
   if (!p) return;
   const soldOut = backendAvailable && p.stock === 0;
   $('detailContent').innerHTML = /* HTML */ `<div class="detailgrid">
-    <div class="productart" style="--bg:${p.bg}">${renderProductArt(p, 'detail')}</div>
+    ${galleryHTML(p)}
     <div>
       <h2 id="detailTitle">${p.name}</h2>
       <div class="price">${formatMoney(p.price)}</div>
@@ -112,6 +113,7 @@ export function showProductDetail(id) {
     $('cart').showModal();
   };
   $('detail').showModal();
+  initGallery($('detailContent'), $('detail'));
 }
 
 export function initCatalog() {

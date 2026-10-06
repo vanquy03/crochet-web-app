@@ -2,6 +2,8 @@
 
 Website bán len với frontend HTML/CSS/JavaScript thuần, backend **Node.js + Express + SQLite**. Có danh mục sản phẩm, giỏ hàng, đặt COD, tài khoản khách, lịch sử đơn cá nhân và trang quản trị sản phẩm, tồn kho, ảnh, đơn hàng, cài đặt shop và tài khoản admin.
 
+Trạng thái triển khai và hướng dẫn bàn giao cho AI: [PROJECT_STATUS.md](PROJECT_STATUS.md).
+
 ## 1. Yêu cầu trước khi chạy
 
 - **Node.js 24 trở lên**, kèm npm. Kiểm tra bằng các lệnh bên dưới.
@@ -368,3 +370,9 @@ Chưa có xác thực email hoặc khôi phục mật khẩu cho khách. QR/than
 - Chạy `npm run db:seed` để thêm ba câu chuyện mẫu và hai sản phẩm thủ công minh họa. Bài mẫu thuộc `user@tiemlen.test` / `UserTest123!`. Seed giữ nguyên dữ liệu đã tồn tại khi chạy lại. Thay ảnh, nội dung và thông tin sản phẩm bằng dữ liệu của bạn trước khi sử dụng thực tế.
 
 Schema v3 tự cập nhật khi khởi động, giữ nguyên tài khoản và đơn hàng. Sao lưu cả SQLite và thư mục uploads theo hướng dẫn phía trên. Thanh toán QR vẫn để làm sau.
+
+## Gallery sản phẩm
+
+Mỗi sản phẩm có tối đa 12 ảnh/video, với duy nhất một ảnh chính cho danh sách. Trong admin → Sản phẩm, tải nhiều file hoặc thêm URL HTTPS, chọn ảnh chính, đổi thứ tự và gỡ file rồi lưu sản phẩm. Ảnh PNG/JPG/WebP tối đa 5 MB; video MP4/WebM tối đa 30 MB. Nên dùng clip ngắn, MP4 H.264 để tương thích tốt trên điện thoại. Hệ thống không chuyển mã hoặc cắt video tự động.
+
+Chi tiết sản phẩm mở với ảnh chính, có thumbnail, nút trước/sau, phím mũi tên khi focus gallery và vuốt ngang trên điện thoại. Video có điều khiển, không tự phát và dừng khi chuyển slide hoặc đóng chi tiết. Migration 004 giữ ảnh cũ làm ảnh chính, không xóa dữ liệu.

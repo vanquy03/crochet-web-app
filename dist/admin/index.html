@@ -187,18 +187,34 @@
         ><label>Mô tả / quy cách<textarea name="desc" maxlength="2000"></textarea></label
         ><label>Nhãn giới thiệu<input name="tag" maxlength="80" /></label
         ><label>Màu len<input name="color" type="color" value="#c69592" /></label
-        ><label>Màu nền<input name="bg" type="color" value="#f1e4df" /></label
-        ><label
-          >URL ảnh<input
-            name="imageUrl"
-            maxlength="1000"
-            placeholder="HTTPS hoặc ảnh đã tải lên" /></label
-        ><label
-          >Tải ảnh (PNG/JPG/WebP, tối đa 5 MB)<input
-            id="imageFile"
-            type="file"
-            accept="image/png,image/jpeg,image/webp" /></label
-        ><label class="check"><input name="active" type="checkbox" checked /> Đang bán</label>
+        ><label>Màu nền<input name="bg" type="color" value="#f1e4df" /></label>
+        <section class="media-editor">
+          <h3>Ảnh và video sản phẩm</h3>
+          <p class="help">
+            Tối đa 12 file. Chọn một ảnh chính cho danh sách sản phẩm. Ảnh tối đa 5 MB; video
+            MP4/WebM tối đa 30 MB.
+          </p>
+          <label
+            >Thêm ảnh/video<input
+              id="imageFile"
+              type="file"
+              multiple
+              accept="image/png,image/jpeg,image/webp,video/mp4,video/webm"
+          /></label>
+          <div class="media-url">
+            <input
+              id="mediaUrl"
+              type="url"
+              placeholder="https://…"
+              aria-label="URL ảnh hoặc video"
+            /><select id="mediaType" aria-label="Loại nội dung">
+              <option value="image">Ảnh</option>
+              <option value="video">Video</option></select
+            ><button type="button" id="addMediaUrl" class="secondary">Thêm URL</button>
+          </div>
+          <div id="productMedia" class="admin-media-list"></div>
+        </section>
+        <label class="check"><input name="active" type="checkbox" checked /> Đang bán</label>
         <p id="productError" role="status"></p>
         <button class="primary">Lưu sản phẩm</button>
       </form>

@@ -43,7 +43,7 @@ try {
       if (db.prepare('SELECT id FROM products WHERE id=?').get(product.id)) continue;
       const values = productInput({ ...product, active: product.active ?? true });
       db.prepare(
-        'INSERT INTO products(id,name,type,description,price,stock,color,background,tag,image_url,active,kind) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',
+        'INSERT INTO products(id,name,type,description,price,stock,color,background,tag,image_url,active,kind,media) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)',
       ).run(product.id, ...values);
       db.prepare('INSERT INTO inventory_log(product_id,delta,reason) VALUES(?,?,?)').run(
         product.id,

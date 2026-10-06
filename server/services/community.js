@@ -6,8 +6,9 @@ export const categories = {
   tips: 'Mẹo nhỏ',
 };
 export function postInput(body) {
-  const title = text(body.title, 'Tiêu đề', 3, 160);
-  const content = text(body.content, 'Câu chuyện', 20, 8000);
+  const draft = body.status === 'draft';
+  const title = text(body.title, 'Tiêu đề', draft ? 0 : 3, 160) || 'Câu chuyện chưa đặt tên';
+  const content = text(body.content, 'Câu chuyện', draft ? 0 : 20, 8000);
   const excerpt = text(body.excerpt || '', 'Lời mở đầu', 0, 240);
   if (!Object.hasOwn(categories, body.category)) throw new HttpError(400, 'Chủ đề không hợp lệ.');
   if (!['draft', 'published'].includes(body.status))

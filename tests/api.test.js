@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { DatabaseSync } from 'node:sqlite';
+import { readFileSync } from 'node:fs';
 import { mkdtemp, rm, readFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -624,7 +625,7 @@ test('v1 migration preserves existing orders without assigning them to a new cus
     );
   legacy.close();
   const migrated = openDatabase(filename);
-  assert.equal(migrated.prepare('PRAGMA user_version').get().user_version, 3);
+  assert.equal(migrated.prepare('PRAGMA user_version').get().user_version, 4);
   const order = migrated.prepare('SELECT * FROM orders WHERE id=?').get('TL-legacy');
   assert.equal(order.total, 65000);
   assert.equal(order.customer_id, null);
@@ -879,4 +880,122 @@ test('community hearts are idempotent, comments owned and moderation guarded', a
     body: form,
   });
   assert.equal(upload.status, 400);
+});
+
+test('product galleries persist order and exactly one primary image, with safe media URLs', async (t) => {
+  const f = await fixture(t);
+  const product =
+    (await f.stock()).value || (await f.admin('/products')).data.find((p) => p.id === 1);
+  const media = [
+    { type: 'image', url: 'https://example.com/first.jpg', primary: false },
+    { type: 'video', url: 'https://example.com/demo.mp4', primary: false },
+    { type: 'image', url: 'https://example.com/main.jpg', primary: true },
+  ];
+  const saved = await f.admin('/products/1', { method: 'PUT', body: { ...product, media } });
+  assert.equal(saved.status, 200);
+  assert.equal(saved.data.imageUrl, media[2].url);
+  assert.deepEqual((await f.call('/api/products/1')).data.media, media);
+  for (const invalid of [
+    media.map((item) => ({ ...item, primary: false })),
+    media.map((item) => ({ ...item, primary: item.type === 'image' })),
+    [{ type: 'video', url: media[1].url, primary: true }],
+    [{ type: 'image', url: 'javascript:alert(1)', primary: true }],
+    Array.from({ length: 13 }, (_, i) => ({
+      type: 'image',
+      url: `https://example.com/${i}.jpg`,
+      primary: i === 0,
+    })),
+  ]) {
+    assert.equal(
+      (await f.admin('/products/1', { method: 'PUT', body: { ...saved.data, media: invalid } }))
+        .status,
+      400,
+    );
+  }
+  const legacy = { ...saved.data, imageUrl: 'https://example.com/legacy.jpg' };
+  delete legacy.media;
+  const updated = await f.admin('/products/1', { method: 'PUT', body: legacy });
+  assert.equal(updated.status, 200);
+  assert.deepEqual(updated.data.media, [{ type: 'image', url: legacy.imageUrl, primary: true }]);
+});
+
+test('admin media upload accepts video signatures, rejects forged files and requires authentication', async (t) => {
+  const f = await fixture(t);
+  async function upload(bytes, cookie = f.headers) {
+    const form = new FormData();
+    form.append('file', new Blob([bytes], { type: 'video/mp4' }), 'demo.mp4');
+    return fetch(f.base + '/api/admin/media', { method: 'POST', headers: cookie, body: form });
+  }
+  assert.equal((await upload(Buffer.from('not a video'))).status, 400);
+  assert.equal((await upload(Buffer.from('not a video'), {})).status, 401);
+  const response = await upload(
+    Buffer.from([0, 0, 0, 24, ...Buffer.from('ftypisom'), 0, 0, 0, 0, ...Buffer.from('isommp42')]),
+  );
+  assert.equal(response.status, 201);
+  const result = await response.json();
+  assert.equal(result.type, 'video');
+  assert.match(result.url, /^\/uploads\/[a-f0-9-]+\.mp4$/);
+  const served = await fetch(f.base + result.url, { headers: { Range: 'bytes=0-11' } });
+  assert.equal(served.status, 206);
+});
+
+test('v3 migration preserves a products existing primary image', async (t) => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'tiem-len-media-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const filename = path.join(directory, 'legacy.sqlite');
+  const legacy = new DatabaseSync(filename);
+  for (const name of ['001-initial.sql', '002-customers.sql', '003-community.sql'])
+    legacy.exec(
+      readFileSync(new URL('../server/migrations/' + name, import.meta.url), 'utf8').replace(
+        /^\uFEFF/,
+        '',
+      ),
+    );
+  legacy
+    .prepare('INSERT INTO products(name,type,price,image_url) VALUES(?,?,?,?)')
+    .run('Legacy yarn', 'cotton', 35000, 'https://example.com/old.jpg');
+  legacy.close();
+  const migrated = openDatabase(filename);
+  t.after(() => migrated.close());
+  assert.equal(migrated.prepare('PRAGMA user_version').get().user_version, 4);
+  assert.equal(
+    migrated.prepare('SELECT image_url FROM products').get().image_url,
+    'https://example.com/old.jpg',
+  );
+});
+
+test('unfinished drafts can be saved privately but publication requires a title and content', async (t) => {
+  const f = await fixture(t);
+  const request = (route, options = {}) =>
+    f.call('/api/community' + route, { ...options, headers: f.customerHeaders });
+  const input = {
+    title: '',
+    content: '',
+    excerpt: '',
+    category: 'journey',
+    coverUrl: '',
+    status: 'draft',
+  };
+  const created = await request('/posts', { method: 'POST', body: input });
+  assert.equal(created.status, 201);
+  assert.equal(created.data.title, 'Câu chuyện chưa đặt tên');
+  assert.equal(created.data.content, '');
+  assert.equal((await f.call('/api/community/posts/' + created.data.id)).status, 404);
+  const invalid = await request('/posts/' + created.data.id, {
+    method: 'PUT',
+    body: { ...input, status: 'published', version: created.data.version },
+  });
+  assert.equal(invalid.status, 400);
+  const published = await request('/posts/' + created.data.id, {
+    method: 'PUT',
+    body: {
+      ...input,
+      title: 'Câu chuyện nhỏ',
+      content: 'Một món đồ tự tay làm dành tặng người mình yêu thương.',
+      status: 'published',
+      version: created.data.version,
+    },
+  });
+  assert.equal(published.status, 200);
+  assert.equal((await f.call('/api/community/posts/' + created.data.id)).status, 200);
 });

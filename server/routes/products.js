@@ -1,4 +1,5 @@
 import multer from 'multer';
+import { productMediaUpload } from '../uploads.js';
 import { randomUUID } from 'node:crypto';
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -13,7 +14,7 @@ export function registerProductsRoutes(app, { db, uploadDir }) {
     const result = transaction(db, () => {
       const r = db
         .prepare(
-          'INSERT INTO products(name,type,description,price,stock,color,background,tag,image_url,active,kind) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
+          'INSERT INTO products(name,type,description,price,stock,color,background,tag,image_url,active,kind,media) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',
         )
         .run(...input);
       db.prepare('INSERT INTO inventory_log(product_id,delta,reason) VALUES(?,?,?)').run(
@@ -39,7 +40,7 @@ export function registerProductsRoutes(app, { db, uploadDir }) {
       if (req.body.version !== old.version)
         throw new HttpError(409, 'Sản phẩm đã thay đổi. Tải lại trước khi lưu tồn kho.');
       db.prepare(
-        "UPDATE products SET name=?,type=?,description=?,price=?,stock=?,color=?,background=?,tag=?,image_url=?,active=?,kind=?,version=version+1,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?",
+        "UPDATE products SET name=?,type=?,description=?,price=?,stock=?,color=?,background=?,tag=?,image_url=?,active=?,kind=?,media=?,version=version+1,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?",
       ).run(...input, req.params.id);
       if (input[4] !== old.stock)
         db.prepare('INSERT INTO inventory_log(product_id,delta,reason) VALUES(?,?,?)').run(
@@ -60,6 +61,7 @@ export function registerProductsRoutes(app, { db, uploadDir }) {
     if (!r.changes) throw new HttpError(404, 'Sản phẩm không tồn tại.');
     res.json({ ok: true });
   });
+  app.post('/api/admin/media', ...productMediaUpload(uploadDir));
   const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 5 * 1024 * 1024, files: 1 },

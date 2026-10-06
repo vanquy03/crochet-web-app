@@ -18,7 +18,7 @@ export function openDatabase(filename) {
   const db = new DatabaseSync(filename);
   db.exec('PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;');
   const version = db.prepare('PRAGMA user_version').get().user_version;
-  if (version > 3) throw new Error('Database version is newer than this application.');
+  if (version > 4) throw new Error('Database version is newer than this application.');
   if (version === 0) {
     db.exec('BEGIN IMMEDIATE');
     try {
@@ -55,6 +55,10 @@ export function openDatabase(filename) {
     transaction(db, () =>
       db.exec(readFileSync(new URL('./migrations/003-community.sql', import.meta.url), 'utf8')),
     );
+  if (version < 4)
+    transaction(db, () =>
+      db.exec(readFileSync(new URL('./migrations/004-product-media.sql', import.meta.url), 'utf8')),
+    );
   return db;
 }
 export function transaction(db, operation) {
@@ -84,6 +88,11 @@ export function publicProduct(row) {
     bg: row.background,
     tag: row.tag,
     imageUrl: row.image_url,
+    media: JSON.parse(row.media || '[]').length
+      ? JSON.parse(row.media)
+      : row.image_url
+        ? [{ type: 'image', url: row.image_url, primary: true }]
+        : [],
     active: Boolean(row.active),
     version: row.version,
   };
