@@ -1,9 +1,8 @@
 import { escapeHTML as h } from '../utils/html.js';
 import { shop } from '../config/shop.js';
 import { $ } from '../utils/dom.js';
-import { cartItems } from './cart.js';
-import { createOrderText, copyOrder } from './order.js';
 const contactIcons = {
+  tiktok: '<path d="M14 3v12a4 4 0 1 1-4-4M14 3c0 4 3 6 6 6V6c-2 0-3-1-3-3h-3Z"/>',
   zalo: '<path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 10 10 0 0 1-4-.9L3 21l1.4-4.5A8.5 8.5 0 0 1 3 11.5a9 9 0 0 1 18 0Z"/><path d="M9 8h6l-6 7h6"/>',
   facebook:
     '<path d="M14 21v-8h3l.5-4H14V7c0-1 .4-2 2-2h2V1.5A24 24 0 0 0 15 1c-3 0-5 2-5 5v3H7v4h3v8Z"/>',
@@ -11,45 +10,30 @@ const contactIcons = {
   phone:
     '<path d="M8 3H4a1 1 0 0 0-1 1c0 9.4 7.6 17 17 17a1 1 0 0 0 1-1v-4l-5-2-2 2a14 14 0 0 1-6-6l2-2-2-5Z"/>',
 };
-function createContactLink(name, url, container, orderMode = false) {
-  const b = document.createElement(orderMode ? 'button' : 'a');
+function createContactLink(name, url, container) {
+  const b = document.createElement('a');
   const kind = url.startsWith('mailto:')
     ? 'email'
     : url.startsWith('tel:')
       ? 'phone'
       : url.includes('zalo.me')
         ? 'zalo'
-        : 'facebook';
+        : new URL(url).hostname.endsWith('tiktok.com')
+          ? 'tiktok'
+          : 'facebook';
   const descriptions = {
     zalo: 'Gửi mẫu, trao đổi ý tưởng',
-    facebook: 'Ghé tiệm và nhắn tin',
+    facebook: 'Nhắn tin với Nhung',
+    tiktok: 'Xem những món đồ mình làm',
     email: shop.email,
     phone: url.slice(4),
   };
-  b.className = orderMode ? 'secondary contact-order-link' : 'contact-channel contact-' + kind;
-  b.innerHTML = `<span class="contact-channel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${contactIcons[kind]}</svg></span><span class="contact-channel-copy"><strong>${h(name)}</strong>${orderMode ? '' : `<small>${h(descriptions[kind])}</small>`}</span>${orderMode ? '' : `<span class="contact-channel-arrow" aria-hidden="true">${kind === 'phone' || kind === 'email' ? '→' : '↗'}</span>`}`;
-  if (orderMode) {
-    b.dataset.orderChannel = name;
-    b.onclick = () => {
-      if (!Object.keys(cartItems).length) return;
-      if (url.startsWith('mailto:')) {
-        window.location.href =
-          url +
-          '?subject=' +
-          encodeURIComponent('Hỏi mua len — ' + (shop.name || 'Tiệm Len')) +
-          '&body=' +
-          encodeURIComponent(createOrderText());
-      } else {
-        window.open(url, '_blank', 'noopener,noreferrer');
-        copyOrder();
-      }
-    };
-  } else {
-    b.href = url;
-    if (!url.startsWith('mailto:') && !url.startsWith('tel:')) {
-      b.target = '_blank';
-      b.rel = 'noopener noreferrer';
-    }
+  b.className = 'contact-channel contact-' + kind;
+  b.innerHTML = `<span class="contact-channel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${contactIcons[kind]}</svg></span><span class="contact-channel-copy"><strong>${h(name)}</strong><small>${h(descriptions[kind])}</small></span><span class="contact-channel-arrow" aria-hidden="true">${kind === 'phone' || kind === 'email' ? '→' : '↗'}</span>`;
+  b.href = url;
+  if (!url.startsWith('mailto:') && !url.startsWith('tel:')) {
+    b.target = '_blank';
+    b.rel = 'noopener noreferrer';
   }
   $(container).append(b);
 }
@@ -59,7 +43,6 @@ export function initContact() {
   const zalo = String(shop.zaloPhone || '').replace(/[^0-9]/g, '');
   if (/^0\d{9}$/.test(zalo)) {
     createContactLink('Nhắn Zalo', 'https://zalo.me/' + zalo, 'contactLinks');
-    createContactLink('Liên hệ qua Zalo', 'https://zalo.me/' + zalo, 'orderChannels', true);
     channels++;
   }
   let facebook;
@@ -81,13 +64,25 @@ export function initContact() {
     /* Bỏ qua địa chỉ Facebook chưa hợp lệ. */
   }
   if (facebook) {
-    createContactLink('Facebook của tiệm', facebook, 'contactLinks');
-    createContactLink('Liên hệ qua Facebook', facebook, 'orderChannels', true);
+    createContactLink('Facebook của Nhung', facebook, 'contactLinks');
     channels++;
   }
+  try {
+    const url = new URL(shop.tiktokUrl);
+    if (
+      url.protocol === 'https:' &&
+      ['tiktok.com', 'www.tiktok.com', 'm.tiktok.com', 'vm.tiktok.com', 'vt.tiktok.com'].includes(
+        url.hostname,
+      )
+    ) {
+      createContactLink('TikTok của Nhung', url.href, 'contactLinks');
+      channels++;
+    }
+  } catch {
+    /* Bỏ qua địa chỉ TikTok chưa hợp lệ. */
+  }
   if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(shop.email || '')) {
-    createContactLink('Email cho tiệm', 'mailto:' + shop.email, 'contactLinks');
-    createContactLink('Soạn email hỏi mua', 'mailto:' + shop.email, 'orderChannels', true);
+    createContactLink('Email cho mình', 'mailto:' + shop.email, 'contactLinks');
     channels++;
   }
   const phone = String(shop.phone || '').replace(/[^0-9+]/g, '');
@@ -96,10 +91,10 @@ export function initContact() {
     channels++;
   }
   $('contactStatus').textContent = channels
-    ? 'Tiệm sẽ xác nhận sản phẩm và thông tin giao hàng qua kênh bạn chọn.'
-    : 'Bạn có thể đặt hàng COD trực tiếp trong giỏ hàng.';
+    ? 'Nhung sẽ xác nhận sản phẩm và thông tin giao hàng qua kênh bạn chọn.'
+    : 'Thông tin liên hệ đang được cập nhật. Bạn hãy ghé lại sau để nhắn mình nhé.';
   $('footerContact').textContent = channels
-    ? shop.name + ' · ' + (phone || shop.email || 'Liên hệ qua Zalo / Facebook')
+    ? shop.name + ' · ' + (phone || shop.email || 'Kết nối với Nhung qua các kênh bên trên')
     : 'Thông tin shop đang được cập nhật.';
   if (shop.demo) {
     const note = document.createElement('p');

@@ -1,6 +1,29 @@
 # Tiệm Len — trạng thái dự án và bàn giao cho AI
 
-Cập nhật: **06/10/2026**, múi giờ Asia/Bangkok. Đọc file này trước khi tiếp tục công việc, sau đó kiểm tra `git status`, `git log` và source để xác nhận trạng thái thực tế. Đây là bản bàn giao của phiên làm việc, không phải danh sách yêu cầu mới cần tự động triển khai.
+Cập nhật: **07/10/2026**, múi giờ Asia/Bangkok. Đọc file này trước khi tiếp tục công việc, sau đó kiểm tra `git status`, `git log` và source để xác nhận trạng thái thực tế. Đây là bản bàn giao của phiên làm việc, không phải danh sách yêu cầu mới cần tự động triển khai.
+
+## Cập nhật mới nhất — 07/10/2026
+
+Phần này ưu tiên hơn các mô tả COD/schema v4 trong bản bàn giao ngày trước.
+
+- Gộp “Chuyện của Nhung” và “Góc chuyện len” thành một mục **Góc sẻ chia** (tên cuối cùng được chủ tiệm chọn) tại `/community/`. Bỏ section giới thiệu riêng `#cau-chuyen` trên trang chủ, đưa lời giới thiệu Nhung vào phần mở đầu trang cộng đồng. Trang chủ giữ phần mời chia sẻ/xem bài mới nhất dưới cùng tên này.
+
+- Chủ tiệm là **Nhung Cap**. Tên hiển thị/logo/title dùng Nhung Cap; lời giới thiệu và CTA dùng “Nhung” hoặc “mình”, không xưng “tiệm”. Settings mặc định đổi sang Nhung Cap; tên mặc định cũ Tiệm Len được chuẩn hóa khi đọc để không ghi đè tên tùy chỉnh hoặc thông tin liên hệ. Giữ nguyên cookie/storage key và mã sản phẩm để tương thích dữ liệu cũ.
+- Bỏ section FAQ “Một vài điều bạn muốn biết”; tiêu đề sản phẩm đổi “Thành phẩm của mình” kèm icon hộp quà SVG. “Gợi ý của Nhung” vẫn giữ thứ tự API `ORDER BY id DESC`, không có thuật toán đề xuất hoặc gắn cờ nổi bật.
+- Contact hỗ trợ TikTok với icon riêng; cấu hình `tiktokUrl` tại Admin → Cài đặt cửa hàng. Chỉ chấp nhận HTTPS trên tiktok.com/www/m/vm/vt.tiktok.com; để trống thì ẩn kênh, không thêm tài khoản giả. Chủ tiệm chưa cung cấp URL thật trong thời điểm cập nhật này. Test mới kiểm tra lưu/xóa URL hợp lệ và từ chối HTTP, JavaScript, host giả; tổng 36 test pass, check/build đạt.
+- **Đóng checkout:** trang chủ không khởi tạo giỏ/checkout, không còn giỏ hàng, số lượng hoặc nút đặt COD. Product detail có “Liên hệ với tiệm” dẫn tới `#mua-hang`, kèm mã sản phẩm để khách nhắn shop. Contact không gợi ý đặt COD khi chưa cấu hình kênh. Người chưa đăng nhập vẫn xem và hỏi mua được.
+- `createApp` mặc định `checkoutEnabled=false`; server runtime không bật nó. `POST /api/orders` từ phiên khách hợp lệ bị chặn 403 trước khi tạo đơn/giữ tồn kho. Các service/module/test checkout cũ vẫn giữ để bảo toàn chức năng và đơn cũ; test legacy đặt `checkoutEnabled=true` riêng trong fixture, không bật trong runtime. Không dùng tham số này để mở lại bán hàng nếu chưa được chủ tiệm yêu cầu.
+- Đơn cũ, lịch sử khách, admin xử lý đơn cũ vẫn giữ. Không xóa dữ liệu runtime.
+- **Schema v5:** migration `005-notifications.sql` thêm `announcements` và `notifications`; không reset dữ liệu.
+- Chuông cho tài khoản khách trên trang chủ/cộng đồng/bài viết/viết bài/tài khoản. Badge chưa đọc, list phân trang 20 mục, đọc một/đọc tất cả, xem bài liên quan, làm mới. Poll số chưa đọc mỗi 15 giây khi tab visible, refresh khi quay lại tab. Không thay thế nội dung popup đang đọc khi poll.
+- Like/comment mới thông báo cho tác giả; không self-notify, một người thả/bỏ/thả lại tim không spam trùng cho cùng bài. Không backfill tương tác cũ. Không gửi nội dung bình luận/email trong thông báo. Bài không còn public/bình luận ẩn bị loại khỏi list và badge.
+- Admin → **Thông báo**: gửi tiêu đề/nội dung tới tất cả khách đang có, lưu lịch sử/số người nhận, rate limit 10 broadcast/15 phút theo IP. Người đăng ký sau không nhận broadcast cũ. Phiên admin/khách và CSRF vẫn tách biệt.
+- Đây là **thông báo trong website**, chưa email/SMS/Web Push khi đóng trình duyệt.
+- File mới: `server/services/notifications.js`, `server/routes/notifications.js`, `server/migrations/005-notifications.sql`, `src/js/features/notifications.js`.
+- Kiểm tra tự động hiện **36 test pass**, thêm test chặn checkout không đổi stock, thông báo tương tác/quyền sở hữu/CSRF/chống trùng/kiểm duyệt, phân trang/read-all, admin broadcast, CTA detail liên hệ.
+- Đã thử Chromium với dữ liệu local riêng ở 320/375/768/1280px: popup thông báo và CTA liên hệ không tràn ngang; khách chưa đăng nhập vẫn hỏi mua được. Đã thử mở bài từ thông báo, đọc tất cả, admin gửi thông báo, hiển thị nội dung an toàn và không có lỗi JavaScript. Chưa thử thiết bị iOS/Android thật.
+- Badge đã được kiểm tra tự cập nhật sau broadcast trong chu kỳ poll, không cần tải lại trang. `format:check`, `check`, `build` và `git diff --check` đều đạt.
+- Commit `957017b` của bản bàn giao trước đã push thành công lên repo chính `vanquy03/crochet-web-app` ngày 07/10/2026. Đợt thay đổi thông báo/đóng checkout là công việc mới; kiểm tra Git để biết đã commit/push hay chưa, không suy ra từ trạng thái lần trước.
 
 ## 1. Mục tiêu và thông tin của chủ tiệm
 

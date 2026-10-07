@@ -77,7 +77,7 @@ async function loadOrders() {
           );
         })
         .join('') ||
-      '<div class="history-empty"><h2>Chưa có đơn hàng nào</h2><p class="help">Chọn một cuộn len bạn yêu để bắt đầu nhé.</p><a class="primary" href="/#san-pham">Khám phá sản phẩm</a></div>';
+      '<div class="history-empty"><h2>Chưa có đơn hàng nào</h2><p class="help">Ghé góc trưng bày và liên hệ với mình khi bạn muốn mua nhé.</p><a class="primary" href="/#san-pham">Khám phá sản phẩm</a></div>';
     $('historyStatus').textContent = '';
     $('historyCount').textContent = result.total + ' đơn hàng';
     $('historyPage').textContent = 'Trang ' + page + ' / ' + pages;

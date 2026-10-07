@@ -71,7 +71,7 @@ export function storyCard(post, mine = false) {
       ? '<div class="my-post-actions">' +
         (post.status !== 'hidden'
           ? '<a class="secondary" href="/write/?id=' + post.id + '">Sửa bài</a>'
-          : '<span class="help">Liên hệ chủ tiệm để xem lại bài.</span>') +
+          : '<span class="help">Liên hệ Nhung để xem lại bài.</span>') +
         '<button class="quiet-button" data-remove-post="' +
         post.id +
         '">Gỡ bài</button></div>'

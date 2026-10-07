@@ -89,9 +89,11 @@ function reset() {
 test('entry point initializes catalog, controls and contact placeholders', async () => {
   assert.equal((element('products').innerHTML.match(/<article>/g) || []).length, 6);
   assert.equal(typeof element('search').oninput, 'function');
-  assert.equal(typeof element('openCart').onclick, 'function');
+  assert.ok(!element('products').innerHTML.includes('data-add'));
+  assert.ok(!element('products').innerHTML.includes('Thêm vào giỏ'));
   assert.equal(element('contactLinks').children.length, 0);
   const html = await readFile(new URL('../src/index.html', import.meta.url), 'utf8');
+  assert.ok(!html.includes('id="cart"'));
   for (const id of elements.keys())
     assert.ok(html.includes(`id="${id}"`), `Missing static element ${id}`);
 });
@@ -220,4 +222,17 @@ test('product content is escaped before insertion in catalog and detail HTML', (
     products[0].name = original;
     reset();
   }
+});
+
+test('showcase detail links to contact instead of quantity, cart or checkout', async () => {
+  reset();
+  catalog.showProductDetail(1);
+  const detail = element('detailContent').innerHTML;
+  assert.ok(detail.includes('id="detailContact"'));
+  assert.ok(detail.includes('href="#mua-hang"'));
+  assert.ok(!detail.includes('detailQty'));
+  assert.ok(!detail.includes('Thêm vào giỏ'));
+  assert.ok(detail.includes('TL-001'));
+  element('detailContact').onclick();
+  assert.equal(element('detail').open, false);
 });

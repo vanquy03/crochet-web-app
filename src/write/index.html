@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Viết một câu chuyện • Tiệm Len</title>
+    <title>Viết một câu chuyện • Nhung Cap</title>
     <link rel="stylesheet" href="/styles/base.css" />
     <link rel="stylesheet" href="/styles/theme.css" />
     <link rel="stylesheet" href="/styles/account.css" />
@@ -13,11 +13,31 @@
     <div class="notice">Một chút len, một khoảng bình yên ♡</div>
     <div class="wrap">
       <header>
-        <a class="logo" href="/"><span aria-hidden="true">❋</span> tiệm len</a>
+        <a class="logo" href="/"><span aria-hidden="true">❋</span> Nhung Cap</a>
         <nav aria-label="Điều hướng chính">
-          <a href="/#san-pham">Góc trưng bày</a><a href="/community/">Góc chuyện len</a>
+          <a href="/#san-pham">Góc trưng bày</a><a href="/community/">Góc sẻ chia</a>
         </nav>
         <a class="accountlink" id="memberLink" href="/login/">Đăng nhập</a>
+        <button
+          type="button"
+          id="notificationsButton"
+          class="notification-bell"
+          aria-label="Thông báo"
+          aria-haspopup="dialog"
+          hidden
+        >
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4M12 2V1" /></svg
+          ><span id="notificationsBadge" class="notification-badge" hidden></span>
+        </button>
       </header>
       <main class="community-main">
         <a class="back-to-shop" href="/community/?mine=1">← Về bài viết của tôi</a>
@@ -83,7 +103,7 @@
                 placeholder="Bắt đầu từ một điều nhỏ thôi…&#10;&#10;Bạn đang làm món đồ gì? Vì sao bạn chọn nó? Có điều gì khiến bạn vui trong lúc đan móc?"
               ></textarea>
               <div class="writer-count">
-                <span>Viết theo cách của bạn, tiệm luôn muốn nghe.</span
+                <span>Viết theo cách của bạn, mình luôn muốn nghe.</span
                 ><span id="characterCount">0 / 8000 ký tự</span>
               </div>
             </section>
@@ -165,7 +185,7 @@
                   rows="4"
                   placeholder="Vài dòng để mời mọi người bước vào câu chuyện."
                 ></textarea>
-                <p class="help">Tối đa 240 ký tự. Để trống, tiệm sẽ lấy phần đầu câu chuyện.</p>
+                <p class="help">Tối đa 240 ký tự. Để trống để dùng phần đầu câu chuyện.</p>
               </section>
               <p class="writer-privacy">
                 <span aria-hidden="true">♡</span> Bản nháp chỉ bạn xem được. Khi chia sẻ, câu chuyện
@@ -198,5 +218,6 @@
       </footer>
     </div>
     <script type="module" src="/js/pages/write.js"></script>
+    <script type="module" src="/js/features/notifications.js"></script>
   </body>
 </html>

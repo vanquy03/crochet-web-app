@@ -3,12 +3,12 @@ import { text, integer, HttpError } from '../validation.js';
 export function registerSettingsRoutes(app, { db }) {
   app.put('/api/admin/settings', (req, res) => {
     const settings = {};
-    for (const key of ['name', 'zaloPhone', 'facebookUrl', 'email', 'phone'])
+    for (const key of ['name', 'zaloPhone', 'facebookUrl', 'tiktokUrl', 'email', 'phone'])
       settings[key] = text(
         req.body[key] || '',
         key,
         key === 'name' ? 2 : 0,
-        key === 'facebookUrl' ? 500 : 200,
+        key === 'facebookUrl' || key === 'tiktokUrl' ? 500 : 200,
       );
     if (settings.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(settings.email))
       throw new HttpError(400, 'Email không hợp lệ.');
@@ -35,6 +35,25 @@ export function registerSettingsRoutes(app, { db }) {
         ].includes(u.hostname)
       )
         throw new HttpError(400, 'URL Facebook không hợp lệ.');
+    }
+    if (settings.tiktokUrl) {
+      let url;
+      try {
+        url = new URL(settings.tiktokUrl);
+      } catch {
+        throw new HttpError(400, 'URL TikTok không hợp lệ.');
+      }
+      if (
+        url.protocol !== 'https:' ||
+        ![
+          'tiktok.com',
+          'www.tiktok.com',
+          'm.tiktok.com',
+          'vm.tiktok.com',
+          'vt.tiktok.com',
+        ].includes(url.hostname)
+      )
+        throw new HttpError(400, 'URL TikTok không hợp lệ.');
     }
     if (typeof req.body.demo !== 'boolean')
       throw new HttpError(400, 'Trạng thái nội dung mẫu không hợp lệ.');

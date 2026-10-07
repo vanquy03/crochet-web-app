@@ -1,3 +1,4 @@
+import { registerNotificationRoutes } from './routes/notifications.js';
 import express from 'express';
 import { registerCommunityRoutes } from './routes/community.js';
 import helmet from 'helmet';
@@ -21,6 +22,7 @@ export function createApp({
   production = false,
   staticDir = path.join(projectRoot, 'src'),
   trustProxy = false,
+  checkoutEnabled = false,
 }) {
   const app = express();
   mkdirSync(uploadDir, { recursive: true });
@@ -80,9 +82,16 @@ export function createApp({
     legacyHeaders: false,
     message: { error: 'Thử đăng nhập hoặc đăng ký quá nhiều lần. Vui lòng đợi 15 phút.' },
   });
-  registerCustomerRoutes(app, { db, production, authLimit: customerAuthLimit, orderLimit });
+  registerCustomerRoutes(app, {
+    db,
+    production,
+    authLimit: customerAuthLimit,
+    orderLimit,
+    checkoutEnabled,
+  });
   // Auth đăng ký login trước rồi áp middleware phiên cho các API admin còn lại.
   registerAuthRoutes(app, { db, production, loginLimit });
+  registerNotificationRoutes(app, { db });
   registerCommunityRoutes(app, { db, uploadDir });
   registerProductsRoutes(app, { db, uploadDir });
   registerOrdersRoutes(app, { db });

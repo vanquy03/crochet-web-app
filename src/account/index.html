@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Đơn hàng của tôi • Tiệm Len</title>
+    <title>Góc của tôi • Nhung Cap</title>
     <link rel="stylesheet" href="/styles/base.css" />
     <link rel="stylesheet" href="/styles/theme.css" />
     <link rel="stylesheet" href="/styles/account.css" />
@@ -13,8 +13,28 @@
     <div class="notice">Một chút len, một khoảng bình yên ♡</div>
     <main class="wrap account-wrap">
       <header>
-        <a class="logo" href="/"><span aria-hidden="true">❋</span> tiệm len</a
+        <a class="logo" href="/"><span aria-hidden="true">❋</span> Nhung Cap</a
         ><a class="back-to-shop" href="/#san-pham">← Về cửa hàng</a>
+        <button
+          type="button"
+          id="notificationsButton"
+          class="notification-bell"
+          aria-label="Thông báo"
+          aria-haspopup="dialog"
+          hidden
+        >
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4M12 2V1" /></svg
+          ><span id="notificationsBadge" class="notification-badge" hidden></span>
+        </button>
       </header>
       <p class="help form-status" id="historyStatus" role="status" aria-live="polite"></p>
       <section id="accountContent" hidden>
@@ -29,11 +49,15 @@
         <div class="community-quicklinks">
           <a class="primary" href="/write/">Viết một câu chuyện</a
           ><a class="secondary" href="/community/?mine=1">Bài viết của tôi</a
-          ><a class="secondary" href="/community/">Góc chuyện len</a>
+          ><a class="secondary" href="/community/">Góc sẻ chia</a>
         </div>
+        <p class="help">
+          Nhung hiện nhận mua hàng qua <a href="/#mua-hang">liên hệ trực tiếp</a>. Các đơn cũ vẫn
+          được lưu ở đây.
+        </p>
         <div class="history-toolbar">
           <div>
-            <h2>Đơn hàng của tôi</h2>
+            <h2>Lịch sử đơn hàng</h2>
             <p class="help" id="historyCount"></p>
           </div>
           <button id="refreshOrders" class="secondary">Cập nhật trạng thái</button>
@@ -47,5 +71,6 @@
       </section>
     </main>
     <script type="module" src="/js/pages/account.js"></script>
+    <script type="module" src="/js/features/notifications.js"></script>
   </body>
 </html>

@@ -1,15 +1,17 @@
 # API cửa hàng
 
+**Chế độ hiện tại:** `POST /api/orders` bị chặn với 403 khi khách có phiên/CSRF hợp lệ. Khách liên hệ shop để mua; API lịch sử đơn và admin quản lý đơn cũ vẫn hoạt động. Các mô tả checkout phía dưới là chức năng cũ được giữ trong code.
+
 API cùng origin với website, tiền tính bằng số nguyên VND. Dữ liệu ghi dùng JSON, ảnh dùng multipart/form-data. API không cho phép CORS từ website khác.
 
 ## Công khai
 
-| Method | Endpoint          | Chức năng                                  |
-| ------ | ----------------- | ------------------------------------------ |
-| GET    | /api/health       | Kiểm tra server/database                   |
-| GET    | /api/products     | Sản phẩm đang bán, gồm stock và version    |
-| GET    | /api/products/:id | Một sản phẩm                               |
-| GET    | /api/settings     | Tên shop, liên hệ, phí giao, thông báo mẫu |
+| Method | Endpoint          | Chức năng                                                  |
+| ------ | ----------------- | ---------------------------------------------------------- |
+| GET    | /api/health       | Kiểm tra server/database                                   |
+| GET    | /api/products     | Sản phẩm đang bán, gồm stock và version                    |
+| GET    | /api/products/:id | Một sản phẩm                                               |
+| GET    | /api/settings     | Tên shop, liên hệ (gồm tiktokUrl), phí giao, thông báo mẫu |
 
 ## Tài khoản khách và đơn hàng cá nhân
 
@@ -79,3 +81,20 @@ Sản phẩm có `media`: mảng tối đa 12 phần tử `{ type: "image" | "vi
 `POST /api/admin/media`: multipart trường `file`, yêu cầu phiên admin và CSRF. Nhận PNG/JPG/WebP tối đa 5 MB hoặc MP4/WebM tối đa 30 MB, trả `201 { url, type }`. Kiểm tra chữ ký file; không chuyển mã hay kiểm tra thời lượng video. Endpoint upload ảnh cũ được giữ để tương thích. File video phục vụ HTTP Range để tua.
 
 Bài cộng đồng `status: "draft"` có thể lưu khi nội dung còn trống hoặc ngắn; tiêu đề trống được đặt là “Câu chuyện chưa đặt tên”. Chia sẻ (`published`) vẫn yêu cầu tiêu đề từ 3 ký tự và nội dung từ 20 ký tự.
+
+## Thông báo
+
+Các endpoint khách cần cookie phiên riêng; thao tác ghi cần `X-CSRF-Token`.
+
+| Method | Endpoint                               | Chức năng                                                                         |
+| ------ | -------------------------------------- | --------------------------------------------------------------------------------- |
+| GET    | `/api/customer/notifications?page=1`   | Thông báo của chính mình, 20 mục/trang; notifications, unread, total, page, pages |
+| GET    | `/api/customer/notifications/unread`   | Số chưa đọc: `{ unread }`                                                         |
+| PATCH  | `/api/customer/notifications/:id/read` | Đọc một thông báo; ID của người khác trả 404                                      |
+| POST   | `/api/customer/notifications/read-all` | Đọc tất cả thông báo của chính mình                                               |
+| GET    | `/api/admin/notifications?page=1`      | Lịch sử gửi toàn bộ thành viên, 20 mục/trang                                      |
+| POST   | `/api/admin/notifications`             | `{ title, body }`; trả 201 `{ id, recipients }`                                   |
+
+Thông báo admin yêu cầu phiên admin, CSRF và JSON; tối đa 10 lần gửi/15 phút theo IP. Tiêu đề 3–160 ký tự, nội dung 3–2000 ký tự; nội dung hiển thị dạng text, không HTML. Gửi đến các tài khoản khách tại thời điểm gửi; không phát lại cho người đăng ký sau.
+
+Notifications gồm id, kind (like/comment/announcement), title, body, href (bài viết hoặc null), read, createdAt. Không gửi email hoặc nội dung bình luận trong thông báo tương tác. Bài ẩn/xóa/nháp và bình luận bị ẩn không được đưa ra danh sách/số chưa đọc. Một lượt thả tim của mỗi người cho mỗi bài chỉ tạo một thông báo; không thông báo tương tác của chính tác giả.

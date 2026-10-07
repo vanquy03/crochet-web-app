@@ -1,7 +1,8 @@
 ﻿export const shop = {
-  name: 'Tiệm Len',
+  name: 'Nhung Cap',
   zaloPhone: '',
   facebookUrl: '',
+  tiktokUrl: '',
   email: '',
   phone: '',
   demo: true,

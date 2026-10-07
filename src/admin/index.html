@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Quản trị • Tiệm Len</title>
+    <title>Quản trị • Nhung Cap</title>
     <link rel="stylesheet" href="/styles/base.css" />
     <link rel="stylesheet" href="/styles/theme.css" />
     <link rel="stylesheet" href="/admin/admin.css" />
@@ -11,14 +11,14 @@
   <body>
     <main class="adminwrap">
       <header>
-        <a class="logo" href="/">❋ Tiệm Len</a><span>Quản trị cửa hàng</span
+        <a class="logo" href="/">❋ Nhung Cap</a><span>Quản trị cửa hàng</span
         ><button id="logout" class="secondary" hidden>Đăng xuất</button>
       </header>
       <p id="message" role="status"></p>
       <section id="loginPanel" aria-labelledby="loginTitle">
-        <div class="eyebrow">Góc nhỏ của chủ tiệm</div>
+        <div class="eyebrow">Góc quản lý của Nhung</div>
         <h1 id="loginTitle">Chào mừng bạn trở lại</h1>
-        <p class="help">Đăng nhập để chăm chút sản phẩm và theo dõi đơn hàng của tiệm.</p>
+        <p class="help">Đăng nhập để chăm chút sản phẩm và theo dõi đơn hàng của mình.</p>
         <form id="loginForm" class="buyer">
           <label>Email<input name="email" type="email" autocomplete="username" required /></label
           ><label
@@ -36,6 +36,7 @@
           <button data-tab="products" class="secondary">Sản phẩm</button
           ><button data-tab="orders" class="secondary">Đơn hàng</button
           ><button data-tab="community" class="secondary">Chuyện len</button
+          ><button data-tab="notifications" class="secondary">Thông báo</button
           ><button data-tab="settings" class="secondary">Cài đặt shop</button
           ><button data-tab="account" class="secondary">Tài khoản</button>
         </nav>
@@ -65,7 +66,7 @@
         </section>
         <section id="ordersPanel" hidden>
           <div class="panelhead">
-            <h2>Đơn hàng</h2>
+            <h2>Đơn hàng đã lưu</h2>
             <select id="orderFilter" aria-label="Lọc theo trạng thái đơn hàng">
               <option value="">Tất cả</option>
               <option value="pending">Chờ xác nhận</option>
@@ -75,6 +76,7 @@
               <option value="cancelled">Đã hủy</option>
             </select>
           </div>
+          <p class="help">Đặt hàng trực tuyến đang tạm đóng. Các đơn cũ vẫn được giữ để quản lý.</p>
           <div class="tablewrap">
             <table>
               <thead>
@@ -92,6 +94,42 @@
           <div class="pagination">
             <button id="prevPage" class="secondary">Trang trước</button><span id="pageInfo"></span
             ><button id="nextPage" class="secondary">Trang sau</button>
+          </div>
+        </section>
+        <section id="notificationsPanel" hidden>
+          <div class="panelhead"><h2>Gửi thông báo cho thành viên</h2></div>
+          <p class="help">
+            Thông báo sẽ xuất hiện trong chuông của tất cả tài khoản khách đang có, kể cả khi họ
+            đăng nhập lại sau.
+          </p>
+          <form id="announcementForm" class="buyer announcement-form">
+            <label
+              >Tiêu đề<input
+                name="title"
+                minlength="3"
+                maxlength="160"
+                required
+                placeholder="Một lời nhắn từ Nhung Cap…"
+            /></label>
+            <label
+              >Nội dung<textarea
+                name="body"
+                minlength="3"
+                maxlength="2000"
+                required
+                rows="5"
+                placeholder="Chia sẻ tin mới, lời mời hoặc thông tin của mình."
+              ></textarea>
+            </label>
+            <p id="announcementStatus" class="help" role="status" aria-live="polite"></p>
+            <button type="submit" class="primary">Gửi tới toàn bộ thành viên</button>
+          </form>
+          <h3>Thông báo đã gửi</h3>
+          <div id="announcementHistory"></div>
+          <div class="pagination">
+            <button type="button" id="announcementsPrev" class="secondary">Trang trước</button
+            ><span id="announcementsPage" class="help"></span
+            ><button type="button" id="announcementsNext" class="secondary">Trang sau</button>
           </div>
         </section>
         <section id="communityPanel" hidden>
@@ -115,6 +153,12 @@
             ><label>Điện thoại<input name="phone" type="tel" /></label
             ><label>Số Zalo<input name="zaloPhone" type="tel" /></label
             ><label>Facebook URL<input name="facebookUrl" type="url" /></label
+            ><label
+              >TikTok URL<input
+                name="tiktokUrl"
+                type="url"
+                maxlength="500"
+                placeholder="https://www.tiktok.com/@taikhoan" /></label
             ><label>Email liên hệ<input name="email" type="email" /></label
             ><label
               >Phí giao hàng (VND)<input

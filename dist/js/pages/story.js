@@ -123,11 +123,11 @@ $('nextComments').onclick = async () => {
 };
 try {
   if (!Number.isSafeInteger(id) || id < 1)
-    throw new Error('Không tìm thấy câu chuyện. Bạn hãy quay lại Góc chuyện len nhé.');
+    throw new Error('Không tìm thấy câu chuyện. Bạn hãy quay lại Góc sẻ chia nhé.');
   await loadCustomerSession();
   updateMemberLink(customer);
   post = await api('/community/posts/' + id);
-  document.title = post.title + ' • Tiệm Len';
+  document.title = post.title + ' • Nhung Cap';
   $('storyTitle').textContent = post.title;
   $('storyTopic').textContent = topicLabels[post.category];
   $('storyAuthor').textContent = post.author.name;

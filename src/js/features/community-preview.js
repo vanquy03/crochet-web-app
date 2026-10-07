@@ -10,8 +10,8 @@ export async function initCommunityPreview() {
     container.innerHTML = posts.map((post) => storyCard(post)).join('');
     status.textContent = posts.length
       ? ''
-      : 'Câu chuyện đầu tiên đang chờ bạn. Ghé Góc chuyện len để bắt đầu nhé.';
+      : 'Câu chuyện đầu tiên đang chờ bạn. Ghé Góc sẻ chia để bắt đầu nhé.';
   } catch {
-    status.textContent = 'Góc chuyện len đang nghỉ một chút. Bạn có thể ghé lại sau nhé.';
+    status.textContent = 'Góc sẻ chia đang nghỉ một chút. Bạn có thể ghé lại sau nhé.';
   }
 }

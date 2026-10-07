@@ -1,3 +1,4 @@
+import { notifyInteraction } from '../services/notifications.js';
 import { rateLimit } from 'express-rate-limit';
 import { requireCustomer, findCustomerSession } from './customers.js';
 import { imageUpload } from '../uploads.js';
@@ -90,7 +91,7 @@ export function registerCommunityRoutes(app, { db, uploadDir }) {
         .get(id, req.customer.customer_id);
       if (!old) throw new HttpError(404, 'Không tìm thấy bài viết của bạn.');
       if (old.status === 'hidden')
-        throw new HttpError(403, 'Bài viết đang được quản trị viên ẩn. Vui lòng liên hệ chủ tiệm.');
+        throw new HttpError(403, 'Bài viết đang được quản trị viên ẩn. Vui lòng liên hệ Nhung.');
       if (old.version !== version)
         throw new HttpError(409, 'Bài viết đã thay đổi. Tải lại bài trước khi sửa tiếp.');
       db.prepare(
@@ -122,13 +123,14 @@ export function registerCommunityRoutes(app, { db, uploadDir }) {
     if (typeof req.body.liked !== 'boolean')
       throw new HttpError(400, 'Trạng thái thả tim không hợp lệ.');
     transaction(db, () => {
-      publishedPost(db, id);
-      if (req.body.liked)
-        db.prepare('INSERT OR IGNORE INTO post_likes(post_id,customer_id) VALUES(?,?)').run(
-          id,
-          req.customer.customer_id,
-        );
-      else
+      const target = publishedPost(db, id);
+      if (req.body.liked) {
+        const inserted = db
+          .prepare('INSERT OR IGNORE INTO post_likes(post_id,customer_id) VALUES(?,?)')
+          .run(id, req.customer.customer_id);
+        if (inserted.changes)
+          notifyInteraction(db, { kind: 'like', post: target, actorId: req.customer.customer_id });
+      } else
         db.prepare('DELETE FROM post_likes WHERE post_id=? AND customer_id=?').run(
           id,
           req.customer.customer_id,
@@ -170,10 +172,17 @@ export function registerCommunityRoutes(app, { db, uploadDir }) {
     const id = postId(req);
     const content = text(req.body.content, 'Bình luận', 2, 1500);
     const result = transaction(db, () => {
-      publishedPost(db, id);
-      return db
+      const target = publishedPost(db, id);
+      const inserted = db
         .prepare('INSERT INTO post_comments(post_id,customer_id,content) VALUES(?,?,?)')
         .run(id, req.customer.customer_id, content);
+      notifyInteraction(db, {
+        kind: 'comment',
+        post: target,
+        actorId: req.customer.customer_id,
+        commentId: Number(inserted.lastInsertRowid),
+      });
+      return inserted;
     });
     res.status(201).json({ id: Number(result.lastInsertRowid) });
   });

@@ -1123,3 +1123,189 @@ select:disabled {
     transform: none;
   }
 }
+
+.product-view-link {
+  border: 1px solid var(--line);
+  border-radius: 50px;
+  background: var(--soft);
+  color: var(--green);
+  min-height: 44px;
+  padding: 8px 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 12px;
+}
+.product-view-link:hover {
+  border-color: var(--green);
+  background: #f8e8ed;
+}
+.detail-contact-box {
+  margin-top: 22px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--soft);
+}
+.detail-contact-box .primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+}
+.detail-contact-box .primary svg {
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+}
+.detail-contact-box p:first-child {
+  margin-top: 0;
+}
+.detail-contact-box p:last-child {
+  margin-bottom: 0;
+}
+.notification-bell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--green);
+  background: var(--surface);
+}
+.notification-bell svg {
+  width: 22px;
+  height: 22px;
+}
+.notification-bell:hover {
+  background: var(--soft);
+  border-color: var(--green);
+}
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 2px solid var(--surface);
+  border-radius: 20px;
+  background: var(--green);
+  color: white;
+  font-size: 10px;
+  display: grid;
+  place-items: center;
+}
+.notifications-dialog {
+  width: min(560px, calc(100vw - 20px));
+}
+.notifications-tools,
+.notifications-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+.notifications-tools .secondary,
+.notifications-pagination .secondary {
+  font-size: 12px;
+  min-height: 44px;
+  padding: 10px 12px;
+}
+.notification-item {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.notification-item.unread {
+  background: var(--soft);
+  border-color: #dcbac6;
+}
+.notification-kind-icon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #f8e8ee;
+  color: var(--green);
+}
+.notification-kind-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.notification-copy {
+  min-width: 0;
+  flex: 1;
+}
+.notification-copy strong {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.notification-copy p {
+  font-size: 13px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  margin: 6px 0;
+}
+.notification-copy small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.notification-read {
+  display: inline-block;
+  margin-top: 10px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--green);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 10px 0;
+  font-size: 12px;
+}
+.notification-copy .notification-read:disabled {
+  text-decoration: none;
+  opacity: 0.7;
+}
+[hidden] {
+  display: none !important;
+}
+
+.notifications-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.products-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+.products-heading-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--green);
+}
+.products-heading-icon svg {
+  width: 0.85em;
+  height: 0.85em;
+}
+.contact-tiktok .contact-channel-icon {
+  color: #6d4256;
+  background: #f5e8ef;
+}

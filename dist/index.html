@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta
       name="description"
-      content="Tiệm Len — len sợi và những cảm hứng nhỏ cho người yêu đan móc."
+      content="Nhung Cap — len sợi và những cảm hứng nhỏ cho người yêu đan móc."
     />
-    <title>Tiệm Len • Một chút len, nhiều dịu dàng</title>
+    <title>Nhung Cap • Một chút len, nhiều dịu dàng</title>
     <link rel="stylesheet" href="styles/base.css" />
     <link rel="stylesheet" href="styles/theme.css" />
     <link rel="stylesheet" href="styles/account.css" />
@@ -17,21 +17,40 @@
     <div class="notice">Một chút len, một khoảng bình yên ♡</div>
     <div class="wrap">
       <header>
-        <a class="logo" href="#"><span aria-hidden="true">❋</span> tiệm len</a>
+        <a class="logo" href="#"><span aria-hidden="true">❋</span> Nhung Cap</a>
         <nav aria-label="Điều hướng chính">
-          <a href="#san-pham">Góc trưng bày</a><a href="#cau-chuyen">Chuyện của tiệm</a
-          ><a href="/community/">Góc chuyện len</a><a href="#mua-hang">Liên hệ</a>
+          <a href="#san-pham">Góc trưng bày</a><a href="/community/">Góc sẻ chia</a
+          ><a href="#mua-hang">Liên hệ</a>
         </nav>
         <div class="headeractions">
-          <a class="accountlink" id="customerLink" href="/login/">Đăng nhập</a
-          ><button class="cartbutton" id="openCart">Giỏ hàng (<span id="count">0</span>)</button>
+          <button
+            type="button"
+            id="notificationsButton"
+            class="notification-bell"
+            aria-label="Thông báo"
+            aria-haspopup="dialog"
+            hidden
+          >
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4M12 2V1" /></svg
+            ><span id="notificationsBadge" class="notification-badge" hidden></span>
+          </button>
+          <a class="accountlink" id="customerLink" href="/login/">Đăng nhập</a>
         </div>
       </header>
       <main>
         <p class="help" id="serviceStatus" role="status"></p>
         <section class="hero">
           <div>
-            <div class="eyebrow">小さな毛糸屋 · Tiệm len nhỏ</div>
+            <div class="eyebrow">Đan móc cùng Nhung</div>
             <h1>Chậm một chút,<br />đan thêm <em>bình yên.</em></h1>
             <p>
               Từ chiếc khăn đầu tiên đến món quà tự tay làm. Chọn một màu len bạn yêu, và bắt đầu
@@ -56,16 +75,31 @@
           <div class="heading">
             <div>
               <div class="eyebrow">Góc nhỏ của người yêu len</div>
-              <h2>Những điều tự tay làm</h2>
+              <h2 class="products-heading">
+                <span class="products-heading-icon" aria-hidden="true"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="m12 3 9 5-9 5-9-5 9-5ZM3 8v9l9 5 9-5V8M12 13v9M7.5 5.5l9 5"
+                    /></svg></span
+                >Thành phẩm của mình
+              </h2>
               <p class="handmade-note">
-                Các sản phẩm trưng bày đều do tiệm tự tay đan móc. Tiệm cũng nhận đan theo yêu cầu —
+                Các sản phẩm trưng bày đều do mình tự tay đan móc. Nhung cũng nhận đan theo yêu cầu
+                —
                 <a href="#mua-hang">liên hệ để cùng làm nên món đồ bạn muốn nhé.</a>
               </p>
             </div>
             <div class="catalogtools">
               <label class="sr-only" for="sort">Sắp xếp sản phẩm</label
               ><select id="sort">
-                <option value="default">Gợi ý của tiệm</option>
+                <option value="default">Gợi ý của Nhung</option>
                 <option value="asc">Giá: thấp đến cao</option>
                 <option value="desc">Giá: cao đến thấp</option></select
               ><input
@@ -87,25 +121,13 @@
           </div>
           <div class="grid" id="products"></div>
         </section>
-        <section class="story" id="cau-chuyen">
-          <div class="storymark">Chậm lại một chút.<br />Đan thêm một hàng.</div>
-          <div>
-            <div class="eyebrow">Chuyện của tiệm</div>
-            <h2>Một góc nhỏ, thật nhiều cảm hứng</h2>
-            <p>
-              Tiệm Len dành cho những ai thích tự tay làm nên những món đồ nhỏ xinh. Dù bạn vừa học
-              mũi móc đầu tiên hay đã có cả một giỏ dự án, mong bạn tìm thấy ở đây một màu sắc khiến
-              mình muốn bắt đầu.
-            </p>
-          </div>
-        </section>
         <section class="section">
           <div class="home-stories-heading story-invitation">
             <div class="story-invitation-copy">
               <div class="eyebrow">
                 <span class="invitation-mark" aria-hidden="true">♡</span> Cùng ngồi lại một chút
               </div>
-              <h2>Những câu chuyện bên giỏ len</h2>
+              <h2>Góc sẻ chia</h2>
               <p class="invitation-lead">Hãy chia sẻ câu chuyện của bạn với chúng mình.</p>
               <p class="invitation-description">
                 Một món quà tự tay làm, những mũi móc đầu tiên hay một ngày bình yên bên giỏ len —
@@ -147,9 +169,9 @@
               ></span>
               Một lời nhắn, một ý tưởng mới
             </div>
-            <h2 id="contactTitle">Bạn có ý tưởng,<br />tiệm có đôi tay.</h2>
+            <h2 id="contactTitle">Bạn có ý tưởng,<br />mình có đôi tay.</h2>
             <p>
-              Muốn một món đồ len mang dấu ấn của riêng bạn? Gửi mẫu hoặc kể cho tiệm nghe ý tưởng —
+              Muốn một món đồ len mang dấu ấn của riêng bạn? Gửi mẫu hoặc kể cho mình nghe ý tưởng —
               chúng mình cùng chọn màu, kiểu dáng và làm nên món đồ bạn yêu nhé.
             </p>
             <div class="contact-service-tag">
@@ -158,7 +180,7 @@
             <div
               id="contactLinks"
               class="contact-channels"
-              aria-label="Các cách liên hệ với tiệm"
+              aria-label="Các cách liên hệ với mình"
             ></div>
             <p class="help" id="contactStatus" role="status"></p>
           </div>
@@ -169,7 +191,7 @@
               <li>
                 <span class="custom-step" aria-hidden="true">01</span>
                 <div>
-                  <strong>Kể tiệm nghe ý tưởng</strong>
+                  <strong>Kể mình nghe ý tưởng</strong>
                   <p>Gửi hình mẫu hoặc mô tả món đồ bạn muốn làm.</p>
                 </div>
               </li>
@@ -183,8 +205,8 @@
               <li>
                 <span class="custom-step" aria-hidden="true">03</span>
                 <div>
-                  <strong>Tiệm bắt đầu đan móc</strong>
-                  <p>Sau khi thống nhất, tiệm tự tay làm món đồ dành riêng cho bạn.</p>
+                  <strong>Nhung bắt đầu đan móc</strong>
+                  <p>Sau khi thống nhất, mình tự tay làm món đồ dành riêng cho bạn.</p>
                 </div>
               </li>
             </ol>
@@ -193,34 +215,10 @@
             >
           </div>
         </section>
-        <section class="faq">
-          <h2>Một vài điều bạn muốn biết</h2>
-          <details>
-            <summary>Mới học móc, nên chọn len nào?</summary>
-            <p>
-              Thử sợi màu sáng để dễ nhìn mũi móc. Gửi mẫu bạn muốn làm để tiệm tư vấn sợi và kim
-              phù hợp.
-            </p>
-          </details>
-          <details>
-            <summary>Màu trên màn hình có giống màu thật không?</summary>
-            <p>
-              Màu có thể khác tùy màn hình và lô nhuộm. Hãy hỏi ảnh thực tế và chọn đủ len cho cùng
-              một dự án.
-            </p>
-          </details>
-          <details>
-            <summary>Phí giao hàng và đổi trả thế nào?</summary>
-            <p>
-              Tiệm sẽ xác nhận phí giao theo địa chỉ và điều kiện đổi trả trước khi thanh toán.
-              Chính sách sẽ cập nhật cùng thông tin shop.
-            </p>
-          </details>
-        </section>
       </main>
       <footer class="footer" id="lien-he">
         <div>
-          <strong>❋ tiệm len</strong>
+          <strong>❋ Nhung Cap</strong>
           <p>Len sợi cho những điều bạn tự tay làm.</p>
         </div>
         <div>
@@ -239,65 +237,8 @@
       </div>
       <div id="detailContent"></div>
     </dialog>
-    <dialog id="cart" aria-label="Giỏ hàng">
-      <div class="dialoghead">
-        <h2>Giỏ len của bạn</h2>
-        <button class="close" id="closeCart" aria-label="Đóng giỏ hàng">×</button>
-      </div>
-      <div id="cartItems"></div>
-      <div class="total"><span>Tiền sản phẩm</span><span id="total"></span></div>
-      <div class="total"><span>Phí giao hàng</span><span id="shippingTotal"></span></div>
-      <div class="total total-final">
-        <span>Tổng thanh toán COD</span><span id="grandTotal"></span>
-      </div>
-      <form id="buyerForm" class="buyer">
-        <label
-          >Họ và tên<input
-            id="buyerName"
-            required
-            minlength="2"
-            maxlength="80"
-            autocomplete="name"
-            placeholder="Tiệm nên gọi bạn là gì?" /></label
-        ><label
-          >Số điện thoại<input
-            id="buyerPhone"
-            type="tel"
-            autocomplete="tel"
-            required
-            maxlength="16"
-            placeholder="09xxxxxxxx" /></label
-        ><label
-          >Địa chỉ nhận hàng<textarea
-            id="buyerAddress"
-            autocomplete="street-address"
-            required
-            minlength="10"
-            maxlength="500"
-            placeholder="Số nhà, đường, phường/xã, tỉnh/thành"
-          ></textarea></label
-        ><label
-          >Lời nhắn (không bắt buộc)<textarea
-            id="buyerNote"
-            maxlength="500"
-            placeholder="Mẫu muốn làm, câu hỏi về màu…"
-          ></textarea>
-        </label>
-      </form>
-      <p class="help">
-        Thanh toán khi nhận hàng (COD). Kiểm tra địa chỉ và tổng tiền trước khi đặt đơn.
-      </p>
-      <button class="primary" id="submitOrder" type="submit" form="buyerForm">Đặt hàng COD</button>
-      <p class="help" id="cartAvailability" role="status"></p>
-      <p class="help" id="checkoutStatus" role="status"></p>
-      <div id="orderReceipt"></div>
-      <div class="actions" id="orderChannels"></div>
-      <div class="actions">
-        <button class="primary" id="copy">Sao chép danh sách</button
-        ><button class="secondary" id="download">Tải phiếu chọn hàng</button>
-      </div>
-    </dialog>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script type="module" src="js/main.js"></script>
+    <script type="module" src="/js/features/notifications.js"></script>
   </body>
 </html>

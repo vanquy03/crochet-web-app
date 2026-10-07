@@ -78,7 +78,7 @@ export function initCheckout() {
       $('orderReceipt').innerHTML =
         `<div class="receipt"><strong>Đã nhận đơn hàng của bạn</strong><p>Mã đơn:</p><code>${escapeHTML(order.id)}</code><p><a href="/account/">Xem đơn hàng của tôi →</a></p><p>Tổng COD: ${formatMoney(order.total)}</p><button type="button" class="secondary" id="saveReceipt">Tải thông tin đơn</button></div>`;
       $('saveReceipt').onclick = () => {
-        const body = `TIỆM LEN\nMã đơn: ${order.id}\nTổng COD: ${formatMoney(order.total)}\nĐăng nhập website để xem lịch sử và trạng thái đơn.`;
+        const body = `NHUNG CAP\nMã đơn: ${order.id}\nTổng COD: ${formatMoney(order.total)}\nĐăng nhập website để xem lịch sử và trạng thái đơn.`;
         const url = URL.createObjectURL(
           new Blob(['\uFEFF' + body], { type: 'text/plain;charset=utf-8' }),
         );
@@ -100,7 +100,7 @@ export function initCheckout() {
         /* Storage có thể bị chặn. */
       }
       $('buyerForm').reset();
-      $('checkoutStatus').textContent = 'Đơn đã lưu. Tiệm sẽ liên hệ xác nhận và gửi hàng.';
+      $('checkoutStatus').textContent = 'Đơn đã lưu. Nhung sẽ liên hệ xác nhận và gửi hàng.';
       renderCart();
       try {
         await loadProducts();

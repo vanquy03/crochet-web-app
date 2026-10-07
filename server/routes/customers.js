@@ -36,7 +36,10 @@ export function requireCustomer(db) {
     next();
   };
 }
-export function registerCustomerRoutes(app, { db, production, authLimit, orderLimit }) {
+export function registerCustomerRoutes(
+  app,
+  { db, production, authLimit, orderLimit, checkoutEnabled = false },
+) {
   const authenticate = requireCustomer(db);
   function startSession(req, res, customer, status = 200) {
     const token = newToken();
@@ -88,6 +91,11 @@ export function registerCustomerRoutes(app, { db, production, authLimit, orderLi
     res.json({ ok: true });
   });
   app.post('/api/orders', authenticate, orderLimit, (req, res) => {
+    if (!checkoutEnabled)
+      throw new HttpError(
+        403,
+        'Nhung hiện nhận mua hàng qua liên hệ. Bạn nhắn mình để hỏi mua nhé.',
+      );
     const result = placeOrder(db, req.body, req.get('idempotency-key'), req.customer.customer_id);
     res.status(result.replay ? 200 : 201).json(result);
   });

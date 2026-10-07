@@ -335,3 +335,24 @@ td .secondary {
     max-width: 100%;
   }
 }
+
+.announcement-form {
+  max-width: 640px;
+}
+.announcement-item {
+  padding: 18px;
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.announcement-item p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.announcement-item strong {
+  overflow-wrap: anywhere;
+}
+.announcement-item small {
+  color: var(--muted);
+}

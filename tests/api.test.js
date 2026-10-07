@@ -12,7 +12,7 @@ import { createApp } from '../server/app.js';
 import { spawnSync } from 'node:child_process';
 import { hashPassword, verifyPassword } from '../server/security.js';
 
-async function fixture(t, { file = false, production = false } = {}) {
+async function fixture(t, { file = false, production = false, checkoutEnabled = true } = {}) {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'tiem-len-api-'));
   const filename = file ? path.join(directory, 'shop.sqlite') : ':memory:';
   const db = openDatabase(filename);
@@ -20,7 +20,12 @@ async function fixture(t, { file = false, production = false } = {}) {
     'owner@example.test',
     hashPassword('Test-only-password-123!'),
   );
-  const app = createApp({ db, uploadDir: path.join(directory, 'uploads'), production });
+  const app = createApp({
+    db,
+    uploadDir: path.join(directory, 'uploads'),
+    production,
+    checkoutEnabled,
+  });
   const server = app.listen(0, '127.0.0.1');
   await once(server, 'listening');
   const base = 'http://127.0.0.1:' + server.address().port;
@@ -625,7 +630,7 @@ test('v1 migration preserves existing orders without assigning them to a new cus
     );
   legacy.close();
   const migrated = openDatabase(filename);
-  assert.equal(migrated.prepare('PRAGMA user_version').get().user_version, 4);
+  assert.equal(migrated.prepare('PRAGMA user_version').get().user_version, 5);
   const order = migrated.prepare('SELECT * FROM orders WHERE id=?').get('TL-legacy');
   assert.equal(order.total, 65000);
   assert.equal(order.customer_id, null);
@@ -957,7 +962,7 @@ test('v3 migration preserves a products existing primary image', async (t) => {
   legacy.close();
   const migrated = openDatabase(filename);
   t.after(() => migrated.close());
-  assert.equal(migrated.prepare('PRAGMA user_version').get().user_version, 4);
+  assert.equal(migrated.prepare('PRAGMA user_version').get().user_version, 5);
   assert.equal(
     migrated.prepare('SELECT image_url FROM products').get().image_url,
     'https://example.com/old.jpg',
@@ -998,4 +1003,224 @@ test('unfinished drafts can be saved privately but publication requires a title 
   });
   assert.equal(published.status, 200);
   assert.equal((await f.call('/api/community/posts/' + created.data.id)).status, 200);
+});
+
+test('closed checkout rejects new orders without changing stock or old order access', async (t) => {
+  const f = await fixture(t, { checkoutEnabled: false });
+  const product = await f.stock(5);
+  assert.equal((await f.place(f.orderBody())).status, 403);
+  assert.equal(f.db.prepare('SELECT COUNT(*) AS n FROM orders').get().n, 0);
+  assert.equal(f.db.prepare('SELECT stock FROM products WHERE id=1').get().stock, product.stock);
+  assert.equal((await f.customer('/orders')).status, 200);
+  assert.equal((await f.call('/api/products')).status, 200);
+});
+async function anotherCustomer(f, email = 'reader@example.test') {
+  const result = await f.call('/api/customer/register', {
+    method: 'POST',
+    body: { name: 'Người đọc', email, password: 'Another-password-123!' },
+  });
+  assert.equal(result.status, 201);
+  const headers = {
+    Cookie: result.response.headers.get('set-cookie').split(';')[0],
+    'X-CSRF-Token': result.data.csrfToken,
+  };
+  return {
+    headers,
+    id: result.data.customer.id,
+    call: (route, options = {}) =>
+      f.call(route, { ...options, headers: { ...headers, ...options.headers } }),
+  };
+}
+async function notificationPost(f) {
+  const result = await f.call('/api/community/posts', {
+    method: 'POST',
+    headers: f.customerHeaders,
+    body: {
+      title: 'Một câu chuyện nhỏ',
+      content: 'Một món đồ len thật đáng yêu do mình tự tay làm.',
+      category: 'journey',
+      status: 'published',
+    },
+  });
+  assert.equal(result.status, 201);
+  return result.data;
+}
+test('likes and comments notify only the author, deduplicate hearts, isolate read state and hide moderated content', async (t) => {
+  const f = await fixture(t),
+    reader = await anotherCustomer(f),
+    post = await notificationPost(f);
+  const route = '/api/community/posts/' + post.id;
+  // Own interactions never notify oneself.
+  await f.call(route + '/like', {
+    method: 'PUT',
+    body: { liked: true },
+    headers: f.customerHeaders,
+  });
+  assert.equal((await f.customer('/notifications/unread')).data.unread, 0);
+  for (const liked of [true, true, false, true])
+    assert.equal(
+      (await reader.call(route + '/like', { method: 'PUT', body: { liked } })).status,
+      200,
+    );
+  assert.equal((await f.customer('/notifications/unread')).data.unread, 1);
+  assert.equal((await reader.call('/api/customer/notifications/unread')).data.unread, 0);
+  const comment = await reader.call(route + '/comments', {
+    method: 'POST',
+    body: { content: 'Món đồ này thật đáng yêu!' },
+  });
+  assert.equal(comment.status, 201);
+  const list = await f.customer('/notifications');
+  assert.equal(list.data.unread, 2);
+  assert.deepEqual(
+    list.data.notifications.map((n) => n.kind),
+    ['comment', 'like'],
+  );
+  assert.ok(list.data.notifications[0].href.endsWith('#comments'));
+  assert.ok(!JSON.stringify(list.data).includes('reader@example.test'));
+  const notificationId = list.data.notifications[0].id;
+  assert.equal(
+    (
+      await reader.call('/api/customer/notifications/' + notificationId + '/read', {
+        method: 'PATCH',
+        body: {},
+      })
+    ).status,
+    404,
+  );
+  assert.equal(
+    (
+      await f.call('/api/customer/notifications/' + notificationId + '/read', {
+        method: 'PATCH',
+        body: {},
+        headers: { Cookie: f.customerHeaders.Cookie },
+      })
+    ).status,
+    403,
+  );
+  assert.equal(
+    (await f.customer('/notifications/' + notificationId + '/read', { method: 'PATCH', body: {} }))
+      .data.unread,
+    1,
+  );
+  assert.equal(
+    (await f.customer('/notifications/' + notificationId + '/read', { method: 'PATCH', body: {} }))
+      .data.unread,
+    1,
+  );
+  await f.admin('/community/posts/' + post.id + '/comments/' + comment.data.id, {
+    method: 'DELETE',
+    body: {},
+  });
+  assert.equal((await f.customer('/notifications')).data.total, 1);
+  await f.admin('/community/posts/' + post.id, {
+    method: 'PATCH',
+    body: { version: post.version, hidden: true },
+  });
+  assert.equal((await f.customer('/notifications')).data.total, 0);
+  assert.equal((await f.customer('/notifications/unread')).data.unread, 0);
+});
+test('notification history is paginated, all-read is private, and anonymous access is denied', async (t) => {
+  const f = await fixture(t),
+    reader = await anotherCustomer(f),
+    post = await notificationPost(f);
+  for (let i = 0; i < 23; i++)
+    assert.equal(
+      (
+        await reader.call('/api/community/posts/' + post.id + '/comments', {
+          method: 'POST',
+          body: { content: 'Lời chia sẻ ' + i },
+        })
+      ).status,
+      201,
+    );
+  const first = await f.customer('/notifications');
+  const second = await f.customer('/notifications?page=2');
+  assert.equal(first.data.notifications.length, 20);
+  assert.equal(second.data.notifications.length, 3);
+  assert.equal(second.data.pages, 2);
+  assert.equal(
+    new Set([...first.data.notifications, ...second.data.notifications].map((n) => n.id)).size,
+    23,
+  );
+  assert.equal((await f.call('/api/customer/notifications')).status, 401);
+  assert.equal((await f.call('/api/customer/notifications/unread')).status, 401);
+  assert.equal((await f.customer('/notifications?page=-1')).status, 400);
+  assert.equal(
+    (await reader.call('/api/customer/notifications/read-all', { method: 'POST', body: {} }))
+      .status,
+    200,
+  );
+  assert.equal((await f.customer('/notifications/unread')).data.unread, 23);
+  await f.customer('/notifications/read-all', { method: 'POST', body: {} });
+  assert.equal((await f.customer('/notifications/unread')).data.unread, 0);
+  assert.ok((await f.customer('/notifications')).data.notifications.every((n) => n.read));
+});
+test('only admin can broadcast to all current members; broadcasts persist and do not expose recipient details', async (t) => {
+  const f = await fixture(t),
+    reader = await anotherCustomer(f);
+  const body = { title: 'Tin mới từ tiệm', body: 'Cùng ghé tiệm và chia sẻ câu chuyện nhé.' };
+  assert.equal((await f.call('/api/admin/notifications', { method: 'POST', body })).status, 401);
+  assert.equal(
+    (await reader.call('/api/admin/notifications', { method: 'POST', body })).status,
+    401,
+  );
+  assert.equal(
+    (
+      await f.call('/api/admin/notifications', {
+        method: 'POST',
+        body,
+        headers: { Cookie: f.headers.Cookie },
+      })
+    ).status,
+    403,
+  );
+  assert.equal(
+    (await f.admin('/notifications', { method: 'POST', body: { ...body, title: '' } })).status,
+    400,
+  );
+  const sent = await f.admin('/notifications', { method: 'POST', body });
+  assert.equal(sent.status, 201);
+  assert.equal(sent.data.recipients, 2);
+  const own = (await f.customer('/notifications')).data.notifications[0];
+  const other = (await reader.call('/api/customer/notifications')).data.notifications[0];
+  assert.equal(own.title, body.title);
+  assert.equal(other.body, body.body);
+  assert.equal(own.href, null);
+  assert.equal(own.kind, 'announcement');
+  await f.customer('/notifications/read-all', { method: 'POST', body: {} });
+  assert.equal((await reader.call('/api/customer/notifications/unread')).data.unread, 1);
+  assert.equal((await f.admin('/notifications')).data.announcements[0].recipients, 2);
+  assert.equal(
+    (await (await anotherCustomer(f, 'later@example.test')).call('/api/customer/notifications'))
+      .data.total,
+    0,
+  );
+});
+
+test('TikTok contact settings persist valid HTTPS links and reject unsafe or misleading hosts', async (t) => {
+  const f = await fixture(t);
+  const settings = (await f.call('/api/settings')).data;
+  const link = 'https://www.tiktok.com/@nhung-example';
+  assert.equal(
+    (await f.admin('/settings', { method: 'PUT', body: { ...settings, tiktokUrl: link } })).status,
+    200,
+  );
+  assert.equal((await f.call('/api/settings')).data.tiktokUrl, link);
+  for (const tiktokUrl of [
+    'javascript:alert(1)',
+    'http://www.tiktok.com/@name',
+    'https://tiktok.com.example.org/@name',
+    'https://example.com/?tiktok.com',
+  ]) {
+    assert.equal(
+      (await f.admin('/settings', { method: 'PUT', body: { ...settings, tiktokUrl } })).status,
+      400,
+    );
+  }
+  assert.equal((await f.call('/api/settings')).data.tiktokUrl, link);
+  assert.equal(
+    (await f.admin('/settings', { method: 'PUT', body: { ...settings, tiktokUrl: '' } })).status,
+    200,
+  );
+  assert.equal((await f.call('/api/settings')).data.tiktokUrl, '');
 });

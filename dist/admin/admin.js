@@ -9,6 +9,8 @@ const statusLabels = {
   completed: 'Hoàn tất',
   cancelled: 'Đã hủy',
 };
+let announcementPage = 1,
+  announcementPages = 1;
 let mediaItems = [],
   uploadingMedia = false;
 let csrf = '',
@@ -162,9 +164,10 @@ document.querySelectorAll('[data-tab]').forEach(
     (button.onclick = async () => {
       document.querySelectorAll('[data-tab]').forEach((b) => b.removeAttribute('aria-current'));
       button.setAttribute('aria-current', 'page');
-      for (const tab of ['products', 'orders', 'community', 'settings', 'account'])
+      for (const tab of ['products', 'orders', 'community', 'notifications', 'settings', 'account'])
         $(tab + 'Panel').hidden = tab !== button.dataset.tab;
       try {
+        if (button.dataset.tab === 'notifications') await loadAnnouncements();
         if (button.dataset.tab === 'community') await loadCommunity();
         if (button.dataset.tab === 'orders') await loadOrders();
         if (button.dataset.tab === 'products') await loadProducts();
@@ -515,5 +518,60 @@ $('communityNext').onclick = async () => {
     await loadCommunity();
   } catch (e) {
     message(e.message);
+  }
+};
+
+async function loadAnnouncements() {
+  const result = await request('/notifications?page=' + announcementPage);
+  announcementPage = result.page;
+  announcementPages = result.pages;
+  $('announcementHistory').innerHTML =
+    result.announcements
+      .map(
+        (item) =>
+          `<article class="announcement-item"><strong>${h(item.title)}</strong><p>${h(item.body)}</p><small>${h(item.createdAt)} · ${item.recipients} thành viên</small></article>`,
+      )
+      .join('') || '<p class="help">Chưa gửi thông báo nào.</p>';
+  $('announcementsPage').textContent = 'Trang ' + announcementPage + ' / ' + announcementPages;
+  $('announcementsPrev').disabled = announcementPage <= 1;
+  $('announcementsNext').disabled = announcementPage >= announcementPages;
+}
+$('announcementForm').onsubmit = (event) => {
+  event.preventDefault();
+  if (!$('announcementForm').reportValidity()) return;
+  busy(
+    event.currentTarget,
+    async () => {
+      const result = await request('/notifications', {
+        method: 'POST',
+        body: JSON.stringify(formData($('announcementForm'))),
+      });
+      $('announcementForm').reset();
+      announcementPage = 1;
+      $('announcementStatus').textContent =
+        'Đã gửi thông báo tới ' + result.recipients + ' thành viên.';
+      await loadAnnouncements();
+    },
+    'announcementStatus',
+  );
+};
+$('announcementsPrev').onclick = async () => {
+  if (announcementPage > 1) {
+    announcementPage--;
+    try {
+      await loadAnnouncements();
+    } catch (error) {
+      message(error.message);
+    }
+  }
+};
+$('announcementsNext').onclick = async () => {
+  if (announcementPage < announcementPages) {
+    announcementPage++;
+    try {
+      await loadAnnouncements();
+    } catch (error) {
+      message(error.message);
+    }
   }
 };

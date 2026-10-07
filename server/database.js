@@ -4,9 +4,10 @@ import path from 'node:path';
 import { products as sampleProducts } from '../src/js/data/sample-products.js';
 
 export const defaultSettings = {
-  name: 'Tiệm Len',
+  name: 'Nhung Cap',
   zaloPhone: '',
   facebookUrl: '',
+  tiktokUrl: '',
   email: '',
   phone: '',
   demo: true,
@@ -18,7 +19,7 @@ export function openDatabase(filename) {
   const db = new DatabaseSync(filename);
   db.exec('PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;');
   const version = db.prepare('PRAGMA user_version').get().user_version;
-  if (version > 4) throw new Error('Database version is newer than this application.');
+  if (version > 5) throw new Error('Database version is newer than this application.');
   if (version === 0) {
     db.exec('BEGIN IMMEDIATE');
     try {
@@ -59,6 +60,10 @@ export function openDatabase(filename) {
     transaction(db, () =>
       db.exec(readFileSync(new URL('./migrations/004-product-media.sql', import.meta.url), 'utf8')),
     );
+  if (version < 5)
+    transaction(db, () =>
+      db.exec(readFileSync(new URL('./migrations/005-notifications.sql', import.meta.url), 'utf8')),
+    );
   return db;
 }
 export function transaction(db, operation) {
@@ -73,7 +78,10 @@ export function transaction(db, operation) {
   }
 }
 export function getSettings(db) {
-  return JSON.parse(db.prepare('SELECT data FROM settings WHERE id=1').get().data);
+  const settings = JSON.parse(db.prepare('SELECT data FROM settings WHERE id=1').get().data);
+  const name = String(settings.name || '').trim();
+  if (!name || name.toLocaleLowerCase('vi-VN') === 'tiệm len') settings.name = defaultSettings.name;
+  return settings;
 }
 export function publicProduct(row) {
   return {

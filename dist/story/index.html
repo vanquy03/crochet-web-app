@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Một câu chuyện • Tiệm Len</title>
+    <title>Một câu chuyện • Nhung Cap</title>
     <link rel="stylesheet" href="/styles/base.css" />
     <link rel="stylesheet" href="/styles/theme.css" />
     <link rel="stylesheet" href="/styles/account.css" />
@@ -13,14 +13,34 @@
     <div class="notice">Một chút len, một khoảng bình yên ♡</div>
     <div class="wrap">
       <header>
-        <a class="logo" href="/"><span aria-hidden="true">❋</span> tiệm len</a>
+        <a class="logo" href="/"><span aria-hidden="true">❋</span> Nhung Cap</a>
         <nav aria-label="Điều hướng chính">
-          <a href="/#san-pham">Góc trưng bày</a><a href="/community/">Góc chuyện len</a>
+          <a href="/#san-pham">Góc trưng bày</a><a href="/community/">Góc sẻ chia</a>
         </nav>
         <a class="accountlink" id="memberLink" href="/login/">Đăng nhập</a>
+        <button
+          type="button"
+          id="notificationsButton"
+          class="notification-bell"
+          aria-label="Thông báo"
+          aria-haspopup="dialog"
+          hidden
+        >
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4M12 2V1" /></svg
+          ><span id="notificationsBadge" class="notification-badge" hidden></span>
+        </button>
       </header>
       <main class="community-main">
-        <a class="back-to-shop" href="/community/">← Về Góc chuyện len</a>
+        <a class="back-to-shop" href="/community/">← Về Góc sẻ chia</a>
         <p id="storyStatus" role="status" aria-live="polite">Đang mở câu chuyện…</p>
         <article id="storyContent" class="story-article" hidden>
           <div class="eyebrow" id="storyTopic"></div>
@@ -72,5 +92,6 @@
       </footer>
     </div>
     <script type="module" src="/js/pages/story.js"></script>
+    <script type="module" src="/js/features/notifications.js"></script>
   </body>
 </html>

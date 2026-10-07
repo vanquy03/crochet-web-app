@@ -5,7 +5,7 @@ import { $, formatMoney, showToast } from '../utils/dom.js';
 import { cartItems } from './cart.js';
 export function createOrderText() {
   return (
-    `DANH SÁCH CHỌN HÀNG — ${shop.name || 'Tiệm Len'}${shop.demo ? ' (BẢN MẪU)' : ''}\n` +
+    `DANH SÁCH CHỌN HÀNG — ${shop.name || 'Nhung Cap'}${shop.demo ? ' (BẢN MẪU)' : ''}\n` +
     products
       .filter((p) => cartItems[p.id])
       .map(
@@ -25,10 +25,10 @@ export function createOrderText() {
 export async function copyOrder() {
   try {
     await navigator.clipboard.writeText(createOrderText());
-    showToast('Đã sao chép. Dán danh sách vào cuộc trò chuyện với tiệm.');
+    showToast('Đã sao chép. Dán danh sách vào cuộc trò chuyện với mình.');
     return true;
   } catch {
-    showToast('Trình duyệt không cho sao chép. Hãy tải danh sách để gửi tiệm.');
+    showToast('Trình duyệt không cho sao chép. Hãy tải danh sách để gửi mình.');
     return false;
   }
 }

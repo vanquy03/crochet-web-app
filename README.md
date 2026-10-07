@@ -2,6 +2,10 @@
 
 Website bán len với frontend HTML/CSS/JavaScript thuần, backend **Node.js + Express + SQLite**. Có danh mục sản phẩm, giỏ hàng, đặt COD, tài khoản khách, lịch sử đơn cá nhân và trang quản trị sản phẩm, tồn kho, ảnh, đơn hàng, cài đặt shop và tài khoản admin.
 
+**Chế độ hiện tại (07/10/2026):** cửa hàng chỉ trưng bày sản phẩm; khách nhắn shop qua phần liên hệ để mua hoặc đặt đan móc. Giỏ hàng/checkout đã tạm đóng cả trên giao diện và API. Các hướng dẫn COD bên dưới mô tả chức năng cũ được giữ để khôi phục sau; đơn cũ vẫn xem và quản lý được.
+
+Chuông thông báo trong tài khoản nhận lượt thích/bình luận mới và tin từ admin. Admin → **Thông báo** để gửi tới toàn bộ thành viên hiện có.
+
 Trạng thái triển khai và hướng dẫn bàn giao cho AI: [PROJECT_STATUS.md](PROJECT_STATUS.md).
 
 ## 1. Yêu cầu trước khi chạy
@@ -376,3 +380,11 @@ Schema v3 tự cập nhật khi khởi động, giữ nguyên tài khoản và �
 Mỗi sản phẩm có tối đa 12 ảnh/video, với duy nhất một ảnh chính cho danh sách. Trong admin → Sản phẩm, tải nhiều file hoặc thêm URL HTTPS, chọn ảnh chính, đổi thứ tự và gỡ file rồi lưu sản phẩm. Ảnh PNG/JPG/WebP tối đa 5 MB; video MP4/WebM tối đa 30 MB. Nên dùng clip ngắn, MP4 H.264 để tương thích tốt trên điện thoại. Hệ thống không chuyển mã hoặc cắt video tự động.
 
 Chi tiết sản phẩm mở với ảnh chính, có thumbnail, nút trước/sau, phím mũi tên khi focus gallery và vuốt ngang trên điện thoại. Video có điều khiển, không tự phát và dừng khi chuyển slide hoặc đóng chi tiết. Migration 004 giữ ảnh cũ làm ảnh chính, không xóa dữ liệu.
+
+## Thông báo trong tài khoản
+
+Migration 005 nâng schema lên v5, giữ nguyên dữ liệu. Chuông xuất hiện sau đăng nhập trên trang chủ, cộng đồng, bài viết, viết bài và tài khoản. Thông báo chưa đọc được cập nhật mỗi 15 giây khi trang đang mở, và khi quay lại tab; mở chuông để đọc hoặc làm mới danh sách. Có đọc từng thông báo và đọc tất cả.
+
+Thông báo cho tác giả khi người khác thả tim/bình luận; không thông báo tương tác của chính mình. Một người thả/bỏ/thả tim lại không tạo trùng thông báo cho cùng bài. Bài không còn công khai hoặc bình luận bị ẩn sẽ không xuất hiện trong danh sách/số chưa đọc. Không tạo lại thông báo cho tương tác cũ trước migration.
+
+Admin gửi tiêu đề/nội dung đến tất cả tài khoản khách đang có, với lịch sử gửi và số người nhận. Thành viên đăng ký sau không nhận lại thông báo cũ. Đây là thông báo trong website, không phải email, SMS hay Web Push khi đóng trình duyệt.
