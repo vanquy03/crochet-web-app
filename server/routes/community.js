@@ -91,7 +91,7 @@ export function registerCommunityRoutes(app, { db, uploadDir }) {
         .get(id, req.customer.customer_id);
       if (!old) throw new HttpError(404, 'Không tìm thấy bài viết của bạn.');
       if (old.status === 'hidden')
-        throw new HttpError(403, 'Bài viết đang được quản trị viên ẩn. Vui lòng liên hệ Nhung.');
+        throw new HttpError(403, 'Bài viết đang được quản trị viên ẩn. Vui lòng nhắn mình.');
       if (old.version !== version)
         throw new HttpError(409, 'Bài viết đã thay đổi. Tải lại bài trước khi sửa tiếp.');
       db.prepare(

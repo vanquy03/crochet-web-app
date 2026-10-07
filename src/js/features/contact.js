@@ -23,8 +23,8 @@ function createContactLink(name, url, container) {
           : 'facebook';
   const descriptions = {
     zalo: 'Gửi mẫu, trao đổi ý tưởng',
-    facebook: 'Nhắn tin với Nhung',
-    tiktok: 'Xem những món đồ mình làm',
+    facebook: 'Theo dõi và thả tim cho mình nhé ♡',
+    tiktok: 'Ủng hộ mình bằng 1 follow nhé',
     email: shop.email,
     phone: url.slice(4),
   };
@@ -42,7 +42,7 @@ export function initContact() {
   let channels = 0;
   const zalo = String(shop.zaloPhone || '').replace(/[^0-9]/g, '');
   if (/^0\d{9}$/.test(zalo)) {
-    createContactLink('Nhắn Zalo', 'https://zalo.me/' + zalo, 'contactLinks');
+    createContactLink('Zalo', 'https://zalo.me/' + zalo, 'contactLinks');
     channels++;
   }
   let facebook;
@@ -64,7 +64,7 @@ export function initContact() {
     /* Bỏ qua địa chỉ Facebook chưa hợp lệ. */
   }
   if (facebook) {
-    createContactLink('Facebook của Nhung', facebook, 'contactLinks');
+    createContactLink('Facebook', facebook, 'contactLinks');
     channels++;
   }
   try {
@@ -75,36 +75,30 @@ export function initContact() {
         url.hostname,
       )
     ) {
-      createContactLink('TikTok của Nhung', url.href, 'contactLinks');
+      createContactLink('TikTok', url.href, 'contactLinks');
       channels++;
     }
   } catch {
     /* Bỏ qua địa chỉ TikTok chưa hợp lệ. */
   }
   if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(shop.email || '')) {
-    createContactLink('Email cho mình', 'mailto:' + shop.email, 'contactLinks');
+    createContactLink('Email', 'mailto:' + shop.email, 'contactLinks');
     channels++;
   }
   const phone = String(shop.phone || '').replace(/[^0-9+]/g, '');
   if (/^\+?\d{9,15}$/.test(phone)) {
-    createContactLink('Gọi ' + phone, 'tel:' + phone, 'contactLinks');
+    createContactLink('Điện thoại', 'tel:' + phone, 'contactLinks');
     channels++;
   }
   $('contactStatus').textContent = channels
-    ? 'Nhung sẽ xác nhận sản phẩm và thông tin giao hàng qua kênh bạn chọn.'
+    ? 'Nhắn mình để chốt món bạn thích và thông tin giao hàng nhé.'
     : 'Thông tin liên hệ đang được cập nhật. Bạn hãy ghé lại sau để nhắn mình nhé.';
   $('footerContact').textContent = channels
-    ? shop.name + ' · ' + (phone || shop.email || 'Kết nối với Nhung qua các kênh bên trên')
+    ? shop.name + ' · ' + (phone || shop.email || 'Kết nối với mình qua các kênh bên trên')
     : 'Thông tin shop đang được cập nhật.';
-  if (shop.demo) {
-    const note = document.createElement('p');
-    note.className = 'demo-note';
-    note.textContent =
-      'Bản trưng bày mẫu: hình minh họa, sản phẩm và giá cần được shop cập nhật trước khi bán.';
-    $('san-pham').insertBefore(note, $('san-pham').firstChild);
-  }
   if (shop.name) {
-    document.title = shop.name + ' • Một chút len, nhiều thương yêu';
+    document.title =
+      shop.name + ($('contactPage') ? ' • Liên hệ' : ' • Một chút len, nhiều thương yêu');
     document.querySelector('.logo').lastChild.textContent = ' ' + shop.name;
   }
 }

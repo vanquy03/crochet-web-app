@@ -924,8 +924,10 @@ select:disabled {
   width: 20px;
   height: 20px;
 }
-.contact-feature h2 {
+.contact-feature :is(h1, h2) {
   margin: 18px 0;
+  font-family: var(--font-heading);
+  font-weight: normal;
   font-size: clamp(30px, 3.8vw, 44px);
   line-height: 1.25;
 }
@@ -1322,4 +1324,15 @@ select:disabled {
 .refresh-orders svg {
   width: 20px;
   height: 20px;
+}
+
+.contact-page {
+  padding: 32px 0 60px;
+}
+.contact-page .contact-feature {
+  margin-top: 0;
+}
+header nav a[aria-current='page'] {
+  color: var(--green);
+  background: var(--soft);
 }

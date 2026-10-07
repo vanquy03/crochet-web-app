@@ -94,7 +94,7 @@ export function registerCustomerRoutes(
     if (!checkoutEnabled)
       throw new HttpError(
         403,
-        'Nhung hiện nhận mua hàng qua liên hệ. Bạn nhắn mình để hỏi mua nhé.',
+        'Mình hiện nhận mua hàng qua liên hệ. Bạn nhắn mình để hỏi mua nhé.',
       );
     const result = placeOrder(db, req.body, req.get('idempotency-key'), req.customer.customer_id);
     res.status(result.replay ? 200 : 201).json(result);

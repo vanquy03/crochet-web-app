@@ -6,6 +6,12 @@ Cập nhật: **07/10/2026**, múi giờ Asia/Bangkok. Đọc file này trước
 
 Phần này ưu tiên hơn các mô tả COD/schema v4 trong bản bàn giao ngày trước.
 
+- Liên hệ chuyển thành trang riêng `/contact/` với module `src/js/pages/contact.js`, lấy settings API và cập nhật trạng thái đăng nhập. Header trang chủ/cộng đồng/bài viết/viết bài/tài khoản/liên hệ dùng cùng ba mục Góc trưng bày, Góc sẻ chia, Liên hệ và cùng vùng chuông/tài khoản. CTA sản phẩm/các link hỏi mua trỏ `/contact/`; bỏ section liên hệ trên trang chủ. 38 test pass, check/build đạt. Chromium 320/375/768/1280px xác nhận ba tab luôn hiện, không tràn ngang, CTA sản phẩm mở trang contact và không có lỗi JS.
+
+- Thiết kế lại `/account/`: header/nav/footer dùng bố cục storefront, lời chào/email và đăng xuất cùng vùng tài khoản; hai thẻ viết bài/xem bài; lịch sử đơn và nút reload riêng. CSS scoped `.account-page` trong `src/styles/account.css`, không đổi layout đăng nhập/cộng đồng. Chromium 320/375/768/1280px không tràn ngang, reload/link viết bài/đăng xuất/redirect khách chưa đăng nhập hoạt động, không lỗi JS. Check/build đạt.
+
+- Lời xưng hô dùng “mình”, giọng thân thiện nhẹ; giữ Nhung Cap cho tên thương hiệu/logo/title. Contact chỉ ghi Zalo/Facebook/TikTok/Email/Điện thoại. TikTok: “Ủng hộ mình bằng 1 follow nhé”; Facebook: “Theo dõi và thả tim cho mình nhé ♡”.
+
 - **Tạm thời cho Render Free:** `server/services/bootstrap-admin.js` tạo admin từ `ADMIN_EMAIL`/`ADMIN_PASSWORD` trước khi server listen. Chỉ tạo email chưa có, không đổi mật khẩu hoặc seed, không log bí mật. Thiếu cả hai thì bỏ qua; thiếu một/sai cấu hình thì fail startup. Có comment đánh dấu tạm thời trong code; hướng dẫn trong README/docs/operations.md và `.env.example`.
 
 - Theo yêu cầu chủ tiệm, bỏ yêu cầu mật khẩu tối thiểu 12 ký tự ở đăng ký khách, đổi mật khẩu admin và CLI tạo admin. Cho phép mật khẩu một ký tự, không yêu cầu độ phức tạp; vẫn bắt buộc nhập, tối đa 200 ký tự, xác nhận nhập lại, hash và xác thực đăng nhập.

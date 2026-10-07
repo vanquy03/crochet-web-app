@@ -1,7 +1,6 @@
 import { initCommunityPreview } from './features/community-preview.js';
 import { renderHero } from './components/artwork.js';
 import { initCatalog } from './features/catalog.js';
-import { initContact } from './features/contact.js';
 import { loadProducts, setProducts } from './data/products.js';
 import { products as sampleProducts } from './data/sample-products.js';
 import { shop, setBackendAvailable } from './config/shop.js';
@@ -22,7 +21,18 @@ try {
   /* Yêu cầu đăng nhập khi không xác minh được phiên. */
 }
 renderHero();
-initContact();
+if (shop.name) {
+  document.title = shop.name + ' • Một chút len, nhiều thương yêu';
+  document.querySelector('.logo').lastChild.textContent = ' ' + shop.name;
+}
+if (shop.demo) {
+  const note = document.createElement('p');
+  note.className = 'demo-note';
+  note.textContent =
+    'Bản trưng bày mẫu: hình minh họa, sản phẩm và giá cần được shop cập nhật trước khi bán.';
+  const section = document.getElementById('san-pham');
+  section.insertBefore(note, section.firstChild);
+}
 initCatalog();
 const accountLink = document.getElementById('customerLink');
 if (accountLink && customer) {

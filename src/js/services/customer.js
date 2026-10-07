@@ -32,7 +32,9 @@ export function safeNext(value) {
     const url = new URL(value || '/account/', globalThis.location.origin);
     if (
       url.origin === globalThis.location.origin &&
-      ['/', '/index.html', '/account/', '/community/', '/story/', '/write/'].includes(url.pathname)
+      ['/', '/index.html', '/account/', '/contact/', '/community/', '/story/', '/write/'].includes(
+        url.pathname,
+      )
     )
       return url.pathname + url.search + url.hash;
   } catch {

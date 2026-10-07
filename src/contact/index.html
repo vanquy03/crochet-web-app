@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Liên hệ • Nhung Cap</title>
+    <link rel="stylesheet" href="/styles/base.css" />
+    <link rel="stylesheet" href="/styles/theme.css" />
+    <link rel="stylesheet" href="/styles/account.css" />
+  </head>
+  <body>
+    <div class="notice">Một chút len, một khoảng bình yên ♡</div>
+    <div class="wrap">
+      <header>
+        <a class="logo" href="/"><span aria-hidden="true">❋</span> Nhung Cap</a>
+        <nav aria-label="Điều hướng chính">
+          <a href="/#san-pham">Góc trưng bày</a><a href="/community/">Góc sẻ chia</a
+          ><a href="/contact/" aria-current="page">Liên hệ</a>
+        </nav>
+        <div class="headeractions">
+          <button
+            type="button"
+            id="notificationsButton"
+            class="notification-bell"
+            aria-label="Thông báo"
+            aria-haspopup="dialog"
+            hidden
+          >
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4M12 2V1" /></svg
+            ><span id="notificationsBadge" class="notification-badge" hidden></span>
+          </button>
+          <a class="accountlink" id="customerLink" href="/login/">Đăng nhập</a>
+        </div>
+      </header>
+      <main id="contactPage" class="contact-page">
+        <section
+          class="section contact contact-feature"
+          id="mua-hang"
+          aria-labelledby="contactTitle"
+        >
+          <div class="contact-intro">
+            <div class="eyebrow">
+              <span class="contact-heading-icon" aria-hidden="true"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M21 11a8 8 0 0 1-8 8H8l-5 3 1.5-6A8 8 0 1 1 21 11Z" />
+                  <path d="M8 10h8M8 14h5" /></svg
+              ></span>
+              Một lời nhắn, một ý tưởng mới
+            </div>
+            <h1 id="contactTitle">Bạn có ý tưởng,<br />mình có đôi tay.</h1>
+            <p>
+              Muốn một món đồ len mang dấu ấn của riêng bạn? Gửi mẫu hoặc kể cho mình nghe ý tưởng —
+              chúng mình cùng chọn màu, kiểu dáng và làm nên món đồ bạn yêu nhé.
+            </p>
+            <div class="contact-service-tag">
+              <span aria-hidden="true">♡</span> Sản phẩm tự tay làm · Nhận đan móc theo yêu cầu
+            </div>
+            <div
+              id="contactLinks"
+              class="contact-channels"
+              aria-label="Các cách liên hệ với mình"
+            ></div>
+            <p class="help" id="contactStatus" role="status"></p>
+          </div>
+          <div class="guide custom-order-guide">
+            <div class="eyebrow">Từ ý tưởng đến món đồ</div>
+            <h3>Đặt riêng, thật đơn giản</h3>
+            <ol>
+              <li>
+                <span class="custom-step" aria-hidden="true">01</span>
+                <div>
+                  <strong>Kể mình nghe ý tưởng</strong>
+                  <p>Gửi hình mẫu hoặc mô tả món đồ bạn muốn làm.</p>
+                </div>
+              </li>
+              <li>
+                <span class="custom-step" aria-hidden="true">02</span>
+                <div>
+                  <strong>Cùng chọn từng chi tiết</strong>
+                  <p>Trao đổi màu sắc, kích thước, giá và thời gian hoàn thành.</p>
+                </div>
+              </li>
+              <li>
+                <span class="custom-step" aria-hidden="true">03</span>
+                <div>
+                  <strong>Để mình đan cho bạn</strong>
+                  <p>Sau khi thống nhất, mình tự tay làm món đồ dành riêng cho bạn.</p>
+                </div>
+              </li>
+            </ol>
+            <a class="contact-browse" href="/#san-pham"
+              >Hoặc chọn một món đồ có sẵn <span aria-hidden="true">→</span></a
+            >
+          </div>
+        </section>
+      </main>
+      <footer class="footer">
+        <p>Chậm lại một chút. Đan thêm một hàng.</p>
+        <span id="footerContact"></span>
+      </footer>
+    </div>
+    <script type="module" src="/js/pages/contact.js"></script>
+    <script type="module" src="/js/features/notifications.js"></script>
+  </body>
+</html>

@@ -9,85 +9,123 @@
     <link rel="stylesheet" href="/styles/account.css" />
     <link rel="stylesheet" href="/styles/community.css" />
   </head>
-  <body>
+  <body class="account-page">
     <div class="notice">Một chút len, một khoảng bình yên ♡</div>
-    <main class="wrap account-wrap">
+    <div class="wrap account-wrap">
       <header>
-        <a class="logo" href="/"><span aria-hidden="true">❋</span> Nhung Cap</a
-        ><a class="back-to-shop" href="/#san-pham">← Về cửa hàng</a>
-        <button
-          type="button"
-          id="notificationsButton"
-          class="notification-bell"
-          aria-label="Thông báo"
-          aria-haspopup="dialog"
-          hidden
-        >
-          <svg
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.7"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4M12 2V1" /></svg
-          ><span id="notificationsBadge" class="notification-badge" hidden></span>
-        </button>
-      </header>
-      <p class="help form-status" id="historyStatus" role="status" aria-live="polite"></p>
-      <section id="accountContent" hidden>
-        <div class="account-welcome">
-          <div>
-            <div class="eyebrow">Góc nhỏ của bạn</div>
-            <h1>Xin chào, <span id="customerName"></span></h1>
-            <p class="help" id="customerEmail"></p>
-          </div>
-          <button id="customerLogout" class="secondary">Đăng xuất</button>
-        </div>
-        <div class="community-quicklinks">
-          <a class="primary" href="/write/">Viết một câu chuyện</a
-          ><a class="secondary" href="/community/?mine=1">Bài viết của tôi</a
-          ><a class="secondary" href="/community/">Góc sẻ chia</a>
-        </div>
-        <p class="help">
-          Nhung hiện nhận mua hàng qua <a href="/#mua-hang">liên hệ trực tiếp</a>. Các đơn cũ vẫn
-          được lưu ở đây.
-        </p>
-        <div class="history-toolbar">
-          <div>
-            <h2>Lịch sử đơn hàng</h2>
-            <p class="help" id="historyCount"></p>
-          </div>
+        <a class="logo" href="/"><span aria-hidden="true">❋</span> Nhung Cap</a>
+        <nav aria-label="Điều hướng chính">
+          <a href="/#san-pham">Góc trưng bày</a><a href="/community/">Góc sẻ chia</a
+          ><a href="/contact/">Liên hệ</a>
+        </nav>
+        <div class="headeractions">
           <button
-            id="refreshOrders"
-            class="secondary refresh-orders"
             type="button"
-            aria-label="Tải lại trạng thái đơn hàng"
-            title="Tải lại trạng thái đơn hàng"
+            id="notificationsButton"
+            class="notification-bell"
+            aria-label="Thông báo"
+            aria-haspopup="dialog"
+            hidden
           >
             <svg
               viewBox="0 0 24 24"
+              aria-hidden="true"
               fill="none"
               stroke="currentColor"
-              stroke-width="1.8"
+              stroke-width="1.7"
               stroke-linecap="round"
               stroke-linejoin="round"
-              aria-hidden="true"
             >
-              <path d="M20 7v5h-5M4 17v-5h5M20 12a8 8 0 0 0-14-5M4 12a8 8 0 0 0 14 5" />
-            </svg>
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4M12 2V1" /></svg
+            ><span id="notificationsBadge" class="notification-badge" hidden></span>
           </button>
+          <a class="accountlink" id="customerLink" aria-current="page" href="/account/"
+            >Góc của tôi</a
+          >
         </div>
-        <div id="orderHistory" class="order-history"></div>
-        <div id="historyPagination" class="history-pagination" hidden>
-          <button id="previousOrders" class="secondary">Trang trước</button
-          ><span id="historyPage"></span
-          ><button id="nextOrders" class="secondary">Trang sau</button>
-        </div>
-      </section>
-    </main>
+      </header>
+      <main class="account-main">
+        <p class="help form-status" id="historyStatus" role="status" aria-live="polite"></p>
+        <section id="accountContent" hidden aria-labelledby="accountTitle">
+          <div class="account-welcome account-hero">
+            <div>
+              <div class="eyebrow">Một góc nhỏ dành riêng cho bạn</div>
+              <h1 id="accountTitle">Chào <span id="customerName"></span> nhé ♡</h1>
+              <p class="help" id="customerEmail"></p>
+              <p class="account-intro">
+                Gom những câu chuyện bạn kể và những món đồ bạn từng chọn, tất cả ở đây nè.
+              </p>
+            </div>
+            <div class="account-session">
+              <span class="account-session-label">Tài khoản của bạn</span
+              ><button id="customerLogout" class="secondary" type="button">Đăng xuất</button>
+            </div>
+          </div>
+          <section class="account-stories" aria-labelledby="accountStoriesTitle">
+            <div class="eyebrow">Góc sẻ chia</div>
+            <h2 id="accountStoriesTitle">Chuyện của bạn, cảm hứng của chúng mình</h2>
+            <div class="account-shortcuts">
+              <a class="account-shortcut" href="/write/"
+                ><span class="account-shortcut-icon" aria-hidden="true">✎</span
+                ><span
+                  ><strong>Viết một câu chuyện</strong
+                  ><small>Có điều gì hay? Kể tụi mình nghe nhé.</small></span
+                ><span aria-hidden="true">↗</span></a
+              >
+              <a class="account-shortcut" href="/community/?mine=1"
+                ><span class="account-shortcut-icon" aria-hidden="true">☷</span
+                ><span
+                  ><strong>Bài viết của tôi</strong
+                  ><small>Xem lại bài đã đăng và những bản nháp.</small></span
+                ><span aria-hidden="true">→</span></a
+              >
+            </div>
+          </section>
+          <section class="account-history" aria-labelledby="accountHistoryTitle">
+            <div class="history-toolbar">
+              <div>
+                <div class="eyebrow">Những món đồ đã chọn</div>
+                <h2 id="accountHistoryTitle">Lịch sử đơn hàng</h2>
+                <p class="help" id="historyCount"></p>
+              </div>
+              <button
+                id="refreshOrders"
+                class="secondary refresh-orders"
+                type="button"
+                aria-label="Tải lại trạng thái đơn hàng"
+                title="Tải lại trạng thái đơn hàng"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M20 7v5h-5M4 17v-5h5M20 12a8 8 0 0 0-14-5M4 12a8 8 0 0 0 14 5" />
+                </svg>
+              </button>
+            </div>
+            <p class="account-order-note">
+              Muốn chọn thêm một món đồ? <a href="/contact/">Nhắn mình nhé ↗</a> Các đơn cũ vẫn được
+              lưu bên dưới.
+            </p>
+            <div id="orderHistory" class="order-history"></div>
+            <div id="historyPagination" class="history-pagination" hidden>
+              <button id="previousOrders" class="secondary">Trang trước</button
+              ><span id="historyPage"></span
+              ><button id="nextOrders" class="secondary">Trang sau</button>
+            </div>
+          </section>
+        </section>
+      </main>
+      <footer class="footer">
+        <p>Chậm lại một chút. Đan thêm một hàng.</p>
+        <a href="/community/">Cùng nhau kể chuyện ♡</a>
+      </footer>
+    </div>
     <script type="module" src="/js/pages/account.js"></script>
     <script type="module" src="/js/features/notifications.js"></script>
   </body>

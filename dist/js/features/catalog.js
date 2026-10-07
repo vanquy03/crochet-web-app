@@ -81,7 +81,7 @@ export function showProductDetail(id) {
       </dl>
       <div class="detail-contact-box">
         <p>Thích món đồ này? Nhắn mình để hỏi mua hoặc đặt làm theo yêu cầu.</p>
-        <a class="primary" id="detailContact" href="#mua-hang"
+        <a class="primary" id="detailContact" href="/contact/"
           ><svg
             viewBox="0 0 24 24"
             aria-hidden="true"
@@ -91,7 +91,7 @@ export function showProductDetail(id) {
           >
             <path d="M21 11a8 8 0 0 1-8 8H8l-5 3 1.5-6A8 8 0 1 1 21 11Z" />
           </svg>
-          Liên hệ với Nhung</a
+          Nhắn mình nhé</a
         >
         <p class="help">
           Gửi mình mã <strong>TL-${String(p.id).padStart(3, '0')}</strong> để trao đổi sản phẩm, giá

@@ -86,12 +86,11 @@ function reset() {
   catalog.renderCatalog();
 }
 
-test('entry point initializes catalog, controls and contact placeholders', async () => {
+test('entry point initializes showcase catalog and controls', async () => {
   assert.equal((element('products').innerHTML.match(/<article>/g) || []).length, 6);
   assert.equal(typeof element('search').oninput, 'function');
   assert.ok(!element('products').innerHTML.includes('data-add'));
   assert.ok(!element('products').innerHTML.includes('Thêm vào giỏ'));
-  assert.equal(element('contactLinks').children.length, 0);
   const html = await readFile(new URL('../src/index.html', import.meta.url), 'utf8');
   assert.ok(!html.includes('id="cart"'));
   for (const id of elements.keys())
@@ -229,7 +228,7 @@ test('showcase detail links to contact instead of quantity, cart or checkout', a
   catalog.showProductDetail(1);
   const detail = element('detailContent').innerHTML;
   assert.ok(detail.includes('id="detailContact"'));
-  assert.ok(detail.includes('href="#mua-hang"'));
+  assert.ok(detail.includes('href="/contact/"'));
   assert.ok(!detail.includes('detailQty'));
   assert.ok(!detail.includes('Thêm vào giỏ'));
   assert.ok(detail.includes('TL-001'));

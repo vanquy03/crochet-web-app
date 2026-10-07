@@ -100,7 +100,7 @@ export function initCheckout() {
         /* Storage có thể bị chặn. */
       }
       $('buyerForm').reset();
-      $('checkoutStatus').textContent = 'Đơn đã lưu. Nhung sẽ liên hệ xác nhận và gửi hàng.';
+      $('checkoutStatus').textContent = 'Đơn đã lưu. Mình sẽ liên hệ xác nhận và gửi hàng.';
       renderCart();
       try {
         await loadProducts();
