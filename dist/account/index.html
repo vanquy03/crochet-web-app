@@ -60,7 +60,25 @@
             <h2>Lịch sử đơn hàng</h2>
             <p class="help" id="historyCount"></p>
           </div>
-          <button id="refreshOrders" class="secondary">Cập nhật trạng thái</button>
+          <button
+            id="refreshOrders"
+            class="secondary refresh-orders"
+            type="button"
+            aria-label="Tải lại trạng thái đơn hàng"
+            title="Tải lại trạng thái đơn hàng"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M20 7v5h-5M4 17v-5h5M20 12a8 8 0 0 0-14-5M4 12a8 8 0 0 0 14 5" />
+            </svg>
+          </button>
         </div>
         <div id="orderHistory" class="order-history"></div>
         <div id="historyPagination" class="history-pagination" hidden>

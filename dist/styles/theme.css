@@ -1309,3 +1309,17 @@ select:disabled {
   color: #6d4256;
   background: #f5e8ef;
 }
+
+.refresh-orders {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  min-height: 44px;
+  padding: 10px;
+  flex: 0 0 auto;
+}
+.refresh-orders svg {
+  width: 20px;
+  height: 20px;
+}
