@@ -62,7 +62,7 @@ export function registerCustomerRoutes(
     const name = text(req.body.name, 'Họ tên', 2, 80);
     const email = text(req.body.email, 'Email', 3, 200).toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new HttpError(400, 'Email không hợp lệ.');
-    const password = secret(req.body.password, 'Mật khẩu', 12, 200);
+    const password = secret(req.body.password, 'Mật khẩu', 1, 200);
     if (db.prepare('SELECT id FROM customers WHERE email=?').get(email))
       throw new HttpError(409, 'Email này đã được đăng ký. Vui lòng đăng nhập.');
     const result = db

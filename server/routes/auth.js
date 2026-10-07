@@ -54,7 +54,7 @@ export function registerAuthRoutes(app, { db, production, loginLimit }) {
   });
   app.put('/api/admin/password', (req, res) => {
     const current = secret(req.body.currentPassword, 'Mật khẩu hiện tại', 1, 200),
-      password = secret(req.body.password, 'Mật khẩu mới', 12, 200);
+      password = secret(req.body.password, 'Mật khẩu mới', 1, 200);
     const admin = db.prepare('SELECT * FROM admins WHERE id=?').get(req.session.admin_id);
     if (!verifyPassword(current, admin.password_hash))
       throw new HttpError(401, 'Mật khẩu hiện tại không đúng.');

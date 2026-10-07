@@ -81,7 +81,7 @@ Dùng cùng `DATA_DIR` khi tạo admin, chạy server và backup. Không commit 
 npm run admin:create
 ```
 
-Nhập email hợp lệ và mật khẩu **từ 12 đến 200 ký tự** theo câu hỏi trong terminal. Mật khẩu được ẩn khi nhập ở terminal tương tác.
+Nhập email hợp lệ và mật khẩu bạn chọn (không để trống, tối đa 200 ký tự) theo câu hỏi trong terminal. Mật khẩu được ẩn khi nhập ở terminal tương tác.
 
 - Không có tài khoản hoặc mật khẩu mặc định.
 - Lệnh tự tạo thư mục dữ liệu, database và chạy migration nếu đây là lần đầu.
@@ -345,7 +345,7 @@ Khách cần đăng nhập khi thêm vào giỏ hoặc đặt hàng. Sau đăng 
 được thêm lại vào giỏ và giỏ tự mở. Giỏ hiện có được giữ khi chuyển qua trang đăng nhập.
 Đăng xuất xóa giỏ và yêu cầu đặt hàng tạm trên trình duyệt để dùng an toàn trên máy chung.
 
-Đăng ký gồm họ tên, email, mật khẩu và nhập lại mật khẩu. Mật khẩu dài 12–200 ký tự, được hash.
+Đăng ký gồm họ tên, email, mật khẩu và nhập lại mật khẩu. Mật khẩu không yêu cầu độ dài tối thiểu hay độ phức tạp; cần nhập mật khẩu, tối đa 200 ký tự và được hash.
 Phiên khách dùng cookie HttpOnly riêng với admin, sống 8 giờ và cần HTTPS ở production.
 Trang lịch sử chỉ hiển thị đơn của tài khoản đang đăng nhập; không còn chức năng tra cứu bằng mã.
 
@@ -388,3 +388,7 @@ Migration 005 nâng schema lên v5, giữ nguyên dữ liệu. Chuông xuất hi
 Thông báo cho tác giả khi người khác thả tim/bình luận; không thông báo tương tác của chính mình. Một người thả/bỏ/thả tim lại không tạo trùng thông báo cho cùng bài. Bài không còn công khai hoặc bình luận bị ẩn sẽ không xuất hiện trong danh sách/số chưa đọc. Không tạo lại thông báo cho tương tác cũ trước migration.
 
 Admin gửi tiêu đề/nội dung đến tất cả tài khoản khách đang có, với lịch sử gửi và số người nhận. Thành viên đăng ký sau không nhận lại thông báo cũ. Đây là thông báo trong website, không phải email, SMS hay Web Push khi đóng trình duyệt.
+
+### Admin tạm thời trên Render Free
+
+Không có Shell: đặt `ADMIN_EMAIL` và `ADMIN_PASSWORD` trong **Render → Environment**, rồi redeploy. Server chỉ tạo email chưa có, không đổi mật khẩu tài khoản hiện hữu, không seed. Đây là giải pháp **tạm thời**, có comment trong `server/services/bootstrap-admin.js`; xem [hướng dẫn Render](docs/operations.md#tạo-admin-tạm-thời-trên-render-free-không-có-shell).

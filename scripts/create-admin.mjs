@@ -17,13 +17,13 @@ try {
   const email = (await rl.question('Email quản trị: ')).trim().toLowerCase();
   if (email.length > 200 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     throw new Error('Email không hợp lệ.');
-  process.stdout.write('Mật khẩu (ít nhất 12 ký tự, được ẩn): ');
+  process.stdout.write('Mật khẩu (được ẩn): ');
   muted = true;
   const password = await rl.question('');
   muted = false;
   process.stdout.write('\n');
-  if (password.length < 12 || password.length > 200)
-    throw new Error('Mật khẩu cần từ 12 đến 200 ký tự.');
+  if (password.length < 1 || password.length > 200)
+    throw new Error('Vui lòng nhập mật khẩu (tối đa 200 ký tự).');
   const root = fileURLToPath(new URL('../', import.meta.url));
   db = openDatabase(
     path.join(path.resolve(process.env.DATA_DIR || path.join(root, 'data')), 'shop.sqlite'),

@@ -394,7 +394,7 @@ test('password change revokes sessions and image upload validates file data', as
     (
       await f.admin('/password', {
         method: 'PUT',
-        body: { currentPassword: 'wrong', password: 'new-test-password-123' },
+        body: { currentPassword: 'wrong', password: '1' },
       })
     ).status,
     401,
@@ -403,7 +403,7 @@ test('password change revokes sessions and image upload validates file data', as
     (
       await f.admin('/password', {
         method: 'PUT',
-        body: { currentPassword: 'Test-only-password-123!', password: 'new-test-password-123' },
+        body: { currentPassword: 'Test-only-password-123!', password: '1' },
       })
     ).status,
     200,
@@ -413,7 +413,7 @@ test('password change revokes sessions and image upload validates file data', as
     (
       await f.call('/api/admin/login', {
         method: 'POST',
-        body: { email: 'owner@example.test', password: 'new-test-password-123' },
+        body: { email: 'owner@example.test', password: '1' },
       })
     ).status,
     200,
@@ -475,10 +475,10 @@ test('customer registration, sessions, CSRF and separation from admin access', a
     (
       await f.call('/api/customer/register', {
         method: 'POST',
-        body: { ...registerBody, email: 'third@example.test', password: 'short' },
+        body: { ...registerBody, email: 'third@example.test', password: '1' },
       })
     ).status,
-    400,
+    201,
   );
   assert.equal(
     (

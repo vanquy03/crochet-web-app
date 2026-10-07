@@ -2,9 +2,16 @@
 import { fileURLToPath } from 'node:url';
 import { openDatabase } from './database.js';
 import { createApp } from './app.js';
+import { bootstrapAdmin } from './services/bootstrap-admin.js';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const dataDir = path.resolve(process.env.DATA_DIR || path.join(root, 'data'));
 const db = openDatabase(path.join(dataDir, 'shop.sqlite'));
+try {
+  if (bootstrapAdmin(db)) console.log('Đã tạo admin từ cấu hình môi trường tạm thời.');
+} catch (error) {
+  db.close();
+  throw error;
+}
 const production = process.env.NODE_ENV === 'production';
 const app = createApp({
   db,

@@ -10,7 +10,7 @@ npm run admin:create
 npm run dev
 ```
 
-Lệnh admin:create hỏi email và mật khẩu (ít nhất 12 ký tự, ẩn khi nhập trong terminal). Không có tài khoản hoặc mật khẩu mặc định. Mật khẩu chỉ được lưu dưới dạng scrypt hash. Website: http://localhost:3000. Quản trị: http://localhost:3000/admin/.
+Lệnh admin:create hỏi email và mật khẩu (không để trống, ẩn khi nhập trong terminal). Không có tài khoản hoặc mật khẩu mặc định. Mật khẩu chỉ được lưu dưới dạng scrypt hash. Website: http://localhost:3000. Quản trị: http://localhost:3000/admin/.
 
 Database được tạo và migration tự chạy lần đầu tại data/shop.sqlite. Ảnh nằm ở data/uploads. Những file này không được commit Git. Muốn đổi vị trí, sao chép .env.example thành .env và đặt DATA_DIR; dùng cùng DATA_DIR khi tạo admin, chạy server và sao lưu.
 
@@ -77,3 +77,11 @@ Nếu quên mật khẩu, người có quyền terminal trên máy chủ có th�
 Đây là cửa hàng cá nhân dùng COD. Tài khoản khách hỗ trợ đăng ký, đăng nhập và lịch sử đơn riêng. Chưa có xác thực email, khôi phục mật khẩu, giảm giá, quản lý biến thể nhiều màu trong một sản phẩm, trả hàng/hoàn tiền tự động hoặc phí giao tính theo hãng. Hãy tạo mỗi màu/quy cách thành một sản phẩm riêng. Đơn chờ không tự hết hạn; chủ shop phải xác nhận hoặc hủy để giải phóng hàng.
 
 Login có giới hạn số lần thử; đặt đơn cũng giới hạn theo IP. Thông tin giao hàng chỉ hiện với quản trị hoặc chính khách sở hữu đơn đã đăng nhập. Không đưa file database/backup vào thư mục public, Git hoặc ảnh tải lên.
+
+## Tạo admin tạm thời trên Render Free (không có Shell)
+
+**Giải pháp tạm thời:** trong Render → Environment, thêm `ADMIN_EMAIL` và `ADMIN_PASSWORD` bằng email/mật khẩu bạn chọn. Cấu hình thêm `NODE_ENV=production`, `HOST=0.0.0.0`, `TRUST_PROXY=1`; để Render cấp `PORT`. Build command: `npm ci && npm run build`; Start command: `npm start`. Lưu biến môi trường rồi redeploy, đăng nhập tại `/admin/` qua HTTPS.
+
+Server tạo admin khi khởi động nếu email chưa tồn tại, hash mật khẩu và không in thông tin đăng nhập ra log. Không tự chạy seed. Không có hai biến thì bỏ qua; thiếu một biến hoặc cấu hình sai thì dừng khởi động với lỗi cấu hình. Đổi `ADMIN_PASSWORD` không đổi mật khẩu của tài khoản đã có; dùng mục đổi mật khẩu trong admin.
+
+Khi có storage bền vững và quy trình tạo admin bằng CLI, xóa hai biến này để ngừng cách khởi tạo tạm thời. Trên Render Free, SQLite/uploads nằm trên filesystem tạm: mất khi restart/redeploy hoặc dịch vụ ngủ (spin down). Xem [giới hạn Render Free](https://render.com/docs/free#local-files-lost-on-redeploy). Bootstrap có thể tạo lại admin nếu database mới, nhưng không khôi phục sản phẩm, bài viết hoặc ảnh đã mất.

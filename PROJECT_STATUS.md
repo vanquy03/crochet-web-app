@@ -6,6 +6,10 @@ Cập nhật: **07/10/2026**, múi giờ Asia/Bangkok. Đọc file này trước
 
 Phần này ưu tiên hơn các mô tả COD/schema v4 trong bản bàn giao ngày trước.
 
+- **Tạm thời cho Render Free:** `server/services/bootstrap-admin.js` tạo admin từ `ADMIN_EMAIL`/`ADMIN_PASSWORD` trước khi server listen. Chỉ tạo email chưa có, không đổi mật khẩu hoặc seed, không log bí mật. Thiếu cả hai thì bỏ qua; thiếu một/sai cấu hình thì fail startup. Có comment đánh dấu tạm thời trong code; hướng dẫn trong README/docs/operations.md và `.env.example`.
+
+- Theo yêu cầu chủ tiệm, bỏ yêu cầu mật khẩu tối thiểu 12 ký tự ở đăng ký khách, đổi mật khẩu admin và CLI tạo admin. Cho phép mật khẩu một ký tự, không yêu cầu độ phức tạp; vẫn bắt buộc nhập, tối đa 200 ký tự, xác nhận nhập lại, hash và xác thực đăng nhập.
+
 - Gộp “Chuyện của Nhung” và “Góc chuyện len” thành một mục **Góc sẻ chia** (tên cuối cùng được chủ tiệm chọn) tại `/community/`. Bỏ section giới thiệu riêng `#cau-chuyen` trên trang chủ, đưa lời giới thiệu Nhung vào phần mở đầu trang cộng đồng. Trang chủ giữ phần mời chia sẻ/xem bài mới nhất dưới cùng tên này.
 
 - Chủ tiệm là **Nhung Cap**. Tên hiển thị/logo/title dùng Nhung Cap; lời giới thiệu và CTA dùng “Nhung” hoặc “mình”, không xưng “tiệm”. Settings mặc định đổi sang Nhung Cap; tên mặc định cũ Tiệm Len được chuẩn hóa khi đọc để không ghi đè tên tùy chỉnh hoặc thông tin liên hệ. Giữ nguyên cookie/storage key và mã sản phẩm để tương thích dữ liệu cũ.
@@ -20,7 +24,7 @@ Phần này ưu tiên hơn các mô tả COD/schema v4 trong bản bàn giao ng�
 - Admin → **Thông báo**: gửi tiêu đề/nội dung tới tất cả khách đang có, lưu lịch sử/số người nhận, rate limit 10 broadcast/15 phút theo IP. Người đăng ký sau không nhận broadcast cũ. Phiên admin/khách và CSRF vẫn tách biệt.
 - Đây là **thông báo trong website**, chưa email/SMS/Web Push khi đóng trình duyệt.
 - File mới: `server/services/notifications.js`, `server/routes/notifications.js`, `server/migrations/005-notifications.sql`, `src/js/features/notifications.js`.
-- Kiểm tra tự động hiện **36 test pass**, thêm test chặn checkout không đổi stock, thông báo tương tác/quyền sở hữu/CSRF/chống trùng/kiểm duyệt, phân trang/read-all, admin broadcast, CTA detail liên hệ.
+- Kiểm tra tự động hiện **38 test pass**, thêm test chặn checkout không đổi stock, thông báo tương tác/quyền sở hữu/CSRF/chống trùng/kiểm duyệt, phân trang/read-all, admin broadcast, CTA detail liên hệ.
 - Đã thử Chromium với dữ liệu local riêng ở 320/375/768/1280px: popup thông báo và CTA liên hệ không tràn ngang; khách chưa đăng nhập vẫn hỏi mua được. Đã thử mở bài từ thông báo, đọc tất cả, admin gửi thông báo, hiển thị nội dung an toàn và không có lỗi JavaScript. Chưa thử thiết bị iOS/Android thật.
 - Badge đã được kiểm tra tự cập nhật sau broadcast trong chu kỳ poll, không cần tải lại trang. `format:check`, `check`, `build` và `git diff --check` đều đạt.
 - Commit `957017b` của bản bàn giao trước đã push thành công lên repo chính `vanquy03/crochet-web-app` ngày 07/10/2026. Đợt thay đổi thông báo/đóng checkout là công việc mới; kiểm tra Git để biết đã commit/push hay chưa, không suy ra từ trạng thái lần trước.
